@@ -50,6 +50,7 @@
             font-size: 16px;
             transition: all 0.3s;
             margin-right: 10px;
+            margin-bottom: 15px;
         }
         button:hover {
             background-color: #2980b9;
@@ -85,7 +86,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 25px 0;
+            margin: 10px 0 25px 0;
             font-size: 15px;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
@@ -170,15 +171,22 @@
             padding: 15px;
             border-radius: 6px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .stat-item h4 {
             margin: 0 0 10px 0;
             color: #6c757d;
+            font-size: 16px;
         }
         .stat-value {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             color: #3498db;
+            text-align: center;
+            margin-top: auto;
         }
         .stat-value.critical {
             color: #8B0000;
@@ -191,6 +199,17 @@
         }
         .stat-value.low {
             color: #008000;
+        }
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .table-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
         }
     </style>
 </head>
@@ -218,17 +237,23 @@
                         <h3>Vulnerability Summary</h3>
                         <div class="summary-stats" id="summaryStats"></div>
                     </div>
-                    <button id="downloadSummaryBtn" class="download-btn">Download Summary</button>
+                    <button id="downloadSummaryBtn" class="download-btn">Download Summary CSV</button>
                 </div>
                 
                 <div id="serviceView" class="tab-content">
+                    <div class="table-header">
+                        <div class="table-title">Service View</div>
+                    </div>
+                    <button id="downloadServiceBtn" class="download-btn">Download Service View CSV</button>
                     <div id="serviceTableContainer"></div>
-                    <button id="downloadServiceBtn" class="download-btn">Download Service View</button>
                 </div>
                 
                 <div id="cveView" class="tab-content">
+                    <div class="table-header">
+                        <div class="table-title">CVE View</div>
+                    </div>
+                    <button id="downloadCveBtn" class="download-btn">Download CVE View CSV</button>
                     <div id="cveTableContainer"></div>
-                    <button id="downloadCveBtn" class="download-btn">Download CVE View</button>
                 </div>
             </div>
         </div>
@@ -443,7 +468,7 @@
                 })).sort((a, b) => b.uniqueCveCount - a.uniqueCveCount);
             }
             
-            // Create CVE view data
+            // Create CVE view data - now sorted by severity first (Critical, High, Medium, Low)
             function createCveViewData(data) {
                 const cveMap = new Map();
                 
@@ -453,7 +478,8 @@
                             cveId: item.cveId,
                             severity: item.severity,
                             affectedServices: new Set(),
-                            serviceCount: 0
+                            serviceCount: 0,
+                            severityLevel: getSeverityLevel(item.severity)
                         });
                     }
                     
@@ -462,12 +488,21 @@
                     entry.serviceCount = entry.affectedServices.size;
                 });
                 
-                return Array.from(cveMap.values()).map(entry => ({
-                    cveId: entry.cveId,
-                    severity: entry.severity,
-                    affectedServiceCount: entry.serviceCount,
-                    affectedServices: Array.from(entry.affectedServices).join(', ')
-                })).sort((a, b) => b.affectedServiceCount - a.affectedServiceCount);
+                return Array.from(cveMap.values())
+                    .sort((a, b) => {
+                        // First sort by severity level (descending)
+                        if (b.severityLevel !== a.severityLevel) {
+                            return b.severityLevel - a.severityLevel;
+                        }
+                        // Then by affected service count (descending)
+                        return b.serviceCount - a.serviceCount;
+                    })
+                    .map(entry => ({
+                        cveId: entry.cveId,
+                        severity: entry.severity,
+                        affectedServiceCount: entry.serviceCount,
+                        affectedServices: Array.from(entry.affectedServices).join(', ')
+                    }));
             }
             
             // Create summary data
@@ -579,7 +614,7 @@
                 serviceTableContainer.appendChild(table);
             }
             
-            // Display CVE view
+            // Display CVE view - now sorted by severity first
             function displayCveView(data) {
                 if (!data.length) {
                     cveTableContainer.innerHTML = '<p>No CVE data to display</p>';
