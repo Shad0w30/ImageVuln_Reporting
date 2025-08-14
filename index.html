@@ -168,14 +168,14 @@
             
             // Process CSV data
             function processCSV(csvData) {
-                const lines = csvData.split('\n');
-                const headers = lines[0].split(',').map(h => h.trim());
+                const lines = csvData.split('\n').filter(line => line.trim());
+                const headers = lines[0].split('\t').map(h => h.trim());
                 
-                // Find column indices
-                const vulnIdIndex = headers.findIndex(h => h.toLowerCase() === 'vulnid');
-                const resourceIdIndex = headers.findIndex(h => h.toLowerCase() === 'resourceid');
-                const descriptionIndex = headers.findIndex(h => h.toLowerCase() === 'description');
-                const severityIndex = headers.findIndex(h => h.toLowerCase() === 'severity');
+                // Find column indices (case sensitive)
+                const vulnIdIndex = headers.indexOf('vulnId');
+                const resourceIdIndex = headers.indexOf('resourceId');
+                const descriptionIndex = headers.indexOf('description');
+                const severityIndex = headers.indexOf('severity');
                 
                 if (vulnIdIndex === -1 || resourceIdIndex === -1 || descriptionIndex === -1 || severityIndex === -1) {
                     throw new Error('Required columns (vulnId, resourceId, description, severity) not found in CSV');
@@ -186,7 +186,7 @@
                 for (let i = 1; i < lines.length; i++) {
                     if (!lines[i].trim()) continue;
                     
-                    const values = lines[i].split(',');
+                    const values = lines[i].split('\t');
                     const vulnId = values[vulnIdIndex]?.trim();
                     const resourceId = values[resourceIdIndex]?.trim();
                     const description = values[descriptionIndex]?.trim();
@@ -244,28 +244,27 @@
             
             // Extract vulnerable package from description
             function extractVulnerablePackage(description) {
-                // Common patterns to look for
+                // Try to find package names in common patterns
                 const patterns = [
-                    /package\s+(["']?)(.*?)\1/i,
-                    /vulnerability\s+in\s+(.*?)\s/,
-                    /(?:in|of)\s+(["']?)(.*?)\1\s+(?:package|module)/i,
-                    /package\s+(["']?)([^\s,;]+)\1/i
+                    /(?:package|library|module)\s+["']?([a-zA-Z0-9\-_\.]+)["']?/i,
+                    /(?:in|of)\s+["']?([a-zA-Z0-9\-_\.]+)["']?\s+(?:package|library|module)/i,
+                    /vulnerability\s+in\s+["']?([a-zA-Z0-9\-_\.]+)["']?/i,
+                    /(?:update|upgrade)\s+["']?([a-zA-Z0-9\-_\.]+)["']?\s+to/i
                 ];
                 
                 for (const pattern of patterns) {
                     const match = description.match(pattern);
-                    if (match && match[2]) {
-                        return match[2].trim();
+                    if (match && match[1]) {
+                        return match[1].trim();
                     }
                 }
                 
                 // Fallback: look for words that might be package names
                 const words = description.split(/\s+/);
                 const candidates = words.filter(word => 
-                    word.includes('.') || // common in package names
-                    word.includes('-') || 
-                    word.includes('/') ||
-                    word.match(/^[a-z0-9]+$/i)
+                    word.match(/^[a-z0-9\-_\.]+$/i) && // basic package name pattern
+                    word.length > 3 && // exclude very short words
+                    !word.match(/^[0-9\.]+$/) // exclude version numbers
                 );
                 
                 return candidates[0] || description.substring(0, 30) + '...';
