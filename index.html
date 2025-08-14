@@ -421,7 +421,7 @@
                 }
             }
             
-            // Create service view data
+            // Create service view data - removed highestSeverity tracking
             function createServiceViewData(data) {
                 const serviceMap = new Map();
                 
@@ -430,7 +430,6 @@
                         serviceMap.set(item.serviceName, {
                             serviceName: item.serviceName,
                             uniqueCves: new Set(),
-                            highestSeverity: item.severity,
                             severityCounts: {
                                 Critical: 0,
                                 High: 0,
@@ -448,19 +447,11 @@
                     if (severity && entry.severityCounts[severity] !== undefined) {
                         entry.severityCounts[severity]++;
                     }
-                    
-                    // Update highest severity
-                    const currentSeverityLevel = getSeverityLevel(entry.highestSeverity);
-                    const newSeverityLevel = getSeverityLevel(item.severity);
-                    if (newSeverityLevel > currentSeverityLevel) {
-                        entry.highestSeverity = item.severity;
-                    }
                 });
                 
                 return Array.from(serviceMap.values()).map(entry => ({
                     serviceName: entry.serviceName,
                     uniqueCveCount: entry.uniqueCves.size,
-                    highestSeverity: entry.highestSeverity,
                     criticalCount: entry.severityCounts.Critical,
                     highCount: entry.severityCounts.High,
                     mediumCount: entry.severityCounts.Medium,
@@ -552,7 +543,7 @@
                 `).join('');
             }
             
-            // Display service view
+            // Display service view - removed Highest Severity column
             function displayServiceView(data) {
                 if (!data.length) {
                     serviceTableContainer.innerHTML = '<p>No service data to display</p>';
@@ -564,7 +555,7 @@
                 // Header
                 const thead = document.createElement('thead');
                 const headerRow = document.createElement('tr');
-                ['Service Name', 'Unique CVEs', 'Highest Severity', 'Critical', 'High', 'Medium', 'Low'].forEach(text => {
+                ['Service Name', 'Unique CVEs', 'Critical', 'High', 'Medium', 'Low'].forEach(text => {
                     const th = document.createElement('th');
                     th.textContent = text;
                     headerRow.appendChild(th);
@@ -584,11 +575,6 @@
                     const cveCountCell = document.createElement('td');
                     cveCountCell.textContent = item.uniqueCveCount;
                     row.appendChild(cveCountCell);
-                    
-                    const severityCell = document.createElement('td');
-                    severityCell.textContent = item.highestSeverity;
-                    severityCell.className = getSeverityClass(item.highestSeverity);
-                    row.appendChild(severityCell);
                     
                     const criticalCell = document.createElement('td');
                     criticalCell.textContent = item.criticalCount;
@@ -673,7 +659,7 @@
                     headers.map(fieldName => {
                         let value = row[fieldName];
                         // Apply severity coloring for CSV
-                        if (fieldName === 'severity' || fieldName === 'highestSeverity') {
+                        if (fieldName === 'severity') {
                             value = getNormalizedSeverity(value);
                         }
                         return `"${String(value || '').replace(/"/g, '""')}"`;
