@@ -165,9 +165,18 @@
             flex-wrap: wrap;
             gap: 15px;
         }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .severity-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
         .stat-item {
-            flex: 1;
-            min-width: 200px;
             background: #f8f9fa;
             padding: 15px;
             border-radius: 6px;
@@ -176,6 +185,9 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+        }
+        .wide-stat {
+            grid-column: span 1;
         }
         .stat-item h4 {
             margin: 0 0 10px 0;
@@ -216,6 +228,22 @@
         .cve-id {
             white-space: nowrap;
         }
+        .clickable {
+            cursor: pointer;
+            text-decoration: underline;
+            color: #3498db;
+        }
+        .cve-details {
+            display: none;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+        .expanded .cve-details {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -240,7 +268,8 @@
                 <div id="summaryView" class="tab-content active">
                     <div class="summary-card">
                         <h3>Vulnerability Summary</h3>
-                        <div class="summary-stats" id="summaryStats"></div>
+                        <div class="summary-grid" id="mainStats"></div>
+                        <div class="severity-grid" id="severityStats"></div>
                     </div>
                     <button id="downloadSummaryBtn" class="download-btn">Download Summary CSV</button>
                 </div>
@@ -271,7 +300,8 @@
             const processBtn = document.getElementById('processBtn');
             const statusDiv = document.getElementById('status');
             const outputSection = document.getElementById('outputSection');
-            const summaryStats = document.getElementById('summaryStats');
+            const mainStats = document.getElementById('mainStats');
+            const severityStats = document.getElementById('severityStats');
             const serviceTableContainer = document.getElementById('serviceTableContainer');
             const cveTableContainer = document.getElementById('cveTableContainer');
             const downloadSummaryBtn = document.getElementById('downloadSummaryBtn');
@@ -341,7 +371,7 @@
                 reader.readAsText(file);
             }
             
-            // Process CSV data - now only looks for required columns
+            // Process CSV data - only looks for required columns
             function processCSV(csvData) {
                 const lines = csvData.split('\n').filter(line => line.trim());
                 if (lines.length < 2) throw new Error('CSV must have header row and at least one data row');
@@ -426,7 +456,7 @@
                 }
             }
             
-            // Create service view data - now includes unique CVE IDs
+            // Create service view data - with expandable CVE counts
             function createServiceViewData(data) {
                 const serviceMap = new Map();
                 
@@ -467,7 +497,7 @@
                 })).sort((a, b) => b.uniqueCveCount - a.uniqueCveCount);
             }
             
-            // Create CVE view data - now sorted by severity first (Critical, High, Medium, Low)
+            // Create CVE view data - sorted by severity first
             function createCveViewData(data) {
                 const cveMap = new Map();
                 
@@ -536,22 +566,40 @@
                 };
             }
             
-            // Display summary statistics - now with equal-sized cards
+            // Display summary statistics - now with two-row layout
             function displaySummaryStats(data) {
-                summaryStats.innerHTML = data.stats.map(item => `
-                    <div class="stat-item">
-                        <h4>${item.metric}</h4>
-                        <div class="stat-value ${item.metric.includes('Critical') ? 'critical' : 
-                                              item.metric.includes('High') ? 'high' :
-                                              item.metric.includes('Medium') ? 'medium' :
-                                              item.metric.includes('Low') ? 'low' : ''}">
-                            ${item.value}
-                        </div>
+                mainStats.innerHTML = `
+                    <div class="stat-item wide-stat">
+                        <h4>Total Unique CVEs</h4>
+                        <div class="stat-value">${data.stats[0].value}</div>
                     </div>
-                `).join('');
+                    <div class="stat-item wide-stat">
+                        <h4>Affected Services</h4>
+                        <div class="stat-value">${data.stats[1].value}</div>
+                    </div>
+                `;
+                
+                severityStats.innerHTML = `
+                    <div class="stat-item">
+                        <h4>Critical Vulnerabilities</h4>
+                        <div class="stat-value critical">${data.stats[2].value}</div>
+                    </div>
+                    <div class="stat-item">
+                        <h4>High Vulnerabilities</h4>
+                        <div class="stat-value high">${data.stats[3].value}</div>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Medium Vulnerabilities</h4>
+                        <div class="stat-value medium">${data.stats[4].value}</div>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Low Vulnerabilities</h4>
+                        <div class="stat-value low">${data.stats[5].value}</div>
+                    </div>
+                `;
             }
             
-            // Display service view - now with CVE IDs column
+            // Display service view - with expandable CVE counts
             function displayServiceView(data) {
                 if (!data.length) {
                     serviceTableContainer.innerHTML = '<p>No service data to display</p>';
@@ -563,7 +611,7 @@
                 // Header
                 const thead = document.createElement('thead');
                 const headerRow = document.createElement('tr');
-                ['Service Name', 'Unique CVEs', 'CVE IDs', 'Critical', 'High', 'Medium', 'Low'].forEach(text => {
+                ['Service Name', 'Unique CVEs', 'Critical', 'High', 'Medium', 'Low'].forEach(text => {
                     const th = document.createElement('th');
                     th.textContent = text;
                     headerRow.appendChild(th);
@@ -581,12 +629,20 @@
                     row.appendChild(serviceCell);
                     
                     const cveCountCell = document.createElement('td');
-                    cveCountCell.textContent = item.uniqueCveCount;
-                    row.appendChild(cveCountCell);
+                    const countSpan = document.createElement('span');
+                    countSpan.textContent = item.uniqueCveCount;
+                    countSpan.className = 'clickable';
+                    countSpan.addEventListener('click', function() {
+                        row.classList.toggle('expanded');
+                    });
+                    cveCountCell.appendChild(countSpan);
                     
-                    const cveIdsCell = document.createElement('td');
-                    cveIdsCell.textContent = item.cveIds;
-                    row.appendChild(cveIdsCell);
+                    const cveDetails = document.createElement('div');
+                    cveDetails.className = 'cve-details';
+                    cveDetails.textContent = item.cveIds;
+                    cveCountCell.appendChild(cveDetails);
+                    
+                    row.appendChild(cveCountCell);
                     
                     const criticalCell = document.createElement('td');
                     criticalCell.textContent = item.criticalCount;
@@ -612,7 +668,7 @@
                 serviceTableContainer.appendChild(table);
             }
             
-            // Display CVE view - now with expanded width for CVE IDs
+            // Display CVE view
             function displayCveView(data) {
                 if (!data.length) {
                     cveTableContainer.innerHTML = '<p>No CVE data to display</p>';
@@ -663,7 +719,7 @@
                 cveTableContainer.appendChild(table);
             }
             
-            // Download CSV
+            // Download CSV - includes CVE IDs in service view
             function downloadCSV(data, filenamePrefix) {
                 if (!data.length) return;
                 
