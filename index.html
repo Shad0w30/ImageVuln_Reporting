@@ -10,56 +10,54 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
-            line-height: 1.6;
+            line-height: 1.4;
         }
         h1 {
             color: #2c3e50;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         .container {
             background-color: #f9f9f9;
             border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .input-section, .output-section {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         label {
             display: block;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 15px;
         }
         input[type="file"] {
-            margin-bottom: 20px;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             width: 100%;
-            font-size: 16px;
+            font-size: 15px;
         }
         button {
             background-color: #3498db;
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
+            padding: 10px 16px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-            margin-right: 10px;
-            margin-bottom: 15px;
+            font-size: 15px;
+            transition: all 0.2s;
+            margin-right: 8px;
+            margin-bottom: 12px;
         }
         button:hover {
             background-color: #2980b9;
-            transform: translateY(-2px);
         }
         button:disabled {
             background-color: #95a5a6;
             cursor: not-allowed;
-            transform: none;
         }
         .download-btn {
             background-color: #27ae60;
@@ -68,10 +66,10 @@
             background-color: #219653;
         }
         .status {
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 6px;
-            font-size: 16px;
+            margin: 15px 0;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 15px;
         }
         .success {
             background-color: #d4edda;
@@ -86,21 +84,21 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 10px 0 25px 0;
-            font-size: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin: 8px 0 20px 0;
+            font-size: 14px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
         }
         th, td {
-            padding: 12px 15px;
+            padding: 10px 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
-            word-break: break-word;
         }
         th {
             background-color: #3498db;
             color: white;
             position: sticky;
             top: 0;
+            white-space: nowrap;
         }
         tr:nth-child(even) {
             background-color: #f2f2f2;
@@ -125,19 +123,20 @@
             font-weight: bold;
         }
         .tab-container {
-            margin-top: 20px;
+            margin-top: 15px;
         }
         .tab-buttons {
             display: flex;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         .tab-button {
-            padding: 10px 20px;
+            padding: 8px 16px;
             background-color: #e0e0e0;
             border: none;
             cursor: pointer;
-            margin-right: 5px;
-            border-radius: 5px 5px 0 0;
+            margin-right: 4px;
+            border-radius: 4px 4px 0 0;
+            font-size: 14px;
         }
         .tab-button.active {
             background-color: #3498db;
@@ -151,56 +150,51 @@
         }
         .summary-card {
             background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
         }
         .summary-card h3 {
-            margin-top: 0;
+            margin: 0 0 12px 0;
             color: #2c3e50;
-        }
-        .summary-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
+            font-size: 16px;
         }
         .summary-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 12px;
         }
         .severity-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
+            gap: 12px;
         }
         .stat-item {
             background: #f8f9fa;
-            padding: 15px;
-            border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            height: 120px;
+            padding: 12px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            height: 80px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
         }
         .wide-stat {
             grid-column: span 1;
         }
         .stat-item h4 {
-            margin: 0 0 10px 0;
+            margin: 0 0 5px 0;
             color: #6c757d;
-            font-size: 16px;
+            font-size: 14px;
             text-align: center;
         }
         .stat-value {
-            font-size: 32px;
+            font-size: 24px;
             font-weight: bold;
             color: #3498db;
             text-align: center;
-            margin-top: auto;
         }
         .stat-value.critical {
             color: #8B0000;
@@ -218,31 +212,38 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .table-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #2c3e50;
+            white-space: nowrap;
         }
         .cve-id {
             white-space: nowrap;
         }
         .clickable {
             cursor: pointer;
-            text-decoration: underline;
             color: #3498db;
+            font-weight: bold;
         }
-        .cve-details {
+        .cve-details-row {
             display: none;
-            padding: 10px;
             background-color: #f8f9fa;
-            border-radius: 4px;
-            margin-top: 5px;
+        }
+        .cve-details-cell {
+            padding: 8px 12px;
             word-break: break-all;
         }
-        .expanded .cve-details {
-            display: block;
+        .expanded + .cve-details-row {
+            display: table-row;
+        }
+        .expanded {
+            background-color: #e6f7ff;
+        }
+        .transition {
+            transition: all 0.3s ease;
         }
     </style>
 </head>
@@ -371,7 +372,7 @@
                 reader.readAsText(file);
             }
             
-            // Process CSV data - only looks for required columns
+            // Process CSV data - improved column detection
             function processCSV(csvData) {
                 const lines = csvData.split('\n').filter(line => line.trim());
                 if (lines.length < 2) throw new Error('CSV must have header row and at least one data row');
@@ -379,18 +380,27 @@
                 // Detect delimiter (tab or comma)
                 let delimiter = '\t';
                 let headers = lines[0].split(delimiter).map(h => h.trim());
-                if (headers.length < 2) {
+                if (headers.length < 3) {
                     delimiter = ',';
                     headers = lines[0].split(delimiter).map(h => h.trim());
                 }
                 
-                // Find column indices (only the ones we need)
-                const vulnIdIndex = headers.indexOf('vulnId');
-                const resourceIdIndex = headers.indexOf('resourceId');
-                const severityIndex = headers.indexOf('severity');
+                // Find column indices (case-insensitive and flexible)
+                const findColumnIndex = (possibleNames) => {
+                    const lowerHeaders = headers.map(h => h.toLowerCase());
+                    for (const name of possibleNames) {
+                        const index = lowerHeaders.indexOf(name.toLowerCase());
+                        if (index !== -1) return index;
+                    }
+                    return -1;
+                };
+                
+                const vulnIdIndex = findColumnIndex(['vulnid', 'vuln id', 'cve', 'cveid', 'cve id']);
+                const resourceIdIndex = findColumnIndex(['resourceid', 'resource id', 'resource', 'service', 'servicename']);
+                const severityIndex = findColumnIndex(['severity', 'vulnerability severity', 'risk', 'risk level']);
                 
                 if ([vulnIdIndex, resourceIdIndex, severityIndex].some(i => i === -1)) {
-                    throw new Error(`Required columns (vulnId, resourceId, severity) not found. Found columns: ${headers.join(', ')}`);
+                    throw new Error(`Required columns not found. Need columns similar to: vulnId, resourceId, severity. Found columns: ${headers.join(', ')}`);
                 }
                 
                 const results = [];
@@ -566,7 +576,7 @@
                 };
             }
             
-            // Display summary statistics - now with two-row layout
+            // Display summary statistics - compact layout
             function displaySummaryStats(data) {
                 mainStats.innerHTML = `
                     <div class="stat-item wide-stat">
@@ -581,25 +591,25 @@
                 
                 severityStats.innerHTML = `
                     <div class="stat-item">
-                        <h4>Critical Vulnerabilities</h4>
+                        <h4>Critical</h4>
                         <div class="stat-value critical">${data.stats[2].value}</div>
                     </div>
                     <div class="stat-item">
-                        <h4>High Vulnerabilities</h4>
+                        <h4>High</h4>
                         <div class="stat-value high">${data.stats[3].value}</div>
                     </div>
                     <div class="stat-item">
-                        <h4>Medium Vulnerabilities</h4>
+                        <h4>Medium</h4>
                         <div class="stat-value medium">${data.stats[4].value}</div>
                     </div>
                     <div class="stat-item">
-                        <h4>Low Vulnerabilities</h4>
+                        <h4>Low</h4>
                         <div class="stat-value low">${data.stats[5].value}</div>
                     </div>
                 `;
             }
             
-            // Display service view - with expandable CVE counts
+            // Display service view - with expandable rows for CVE IDs
             function displayServiceView(data) {
                 if (!data.length) {
                     serviceTableContainer.innerHTML = '<p>No service data to display</p>';
@@ -607,6 +617,7 @@
                 }
                 
                 const table = document.createElement('table');
+                table.className = 'transition';
                 
                 // Header
                 const thead = document.createElement('thead');
@@ -622,7 +633,9 @@
                 // Body
                 const tbody = document.createElement('tbody');
                 data.forEach(item => {
+                    // Main row
                     const row = document.createElement('tr');
+                    row.className = 'transition clickable-row';
                     
                     const serviceCell = document.createElement('td');
                     serviceCell.textContent = item.serviceName;
@@ -632,16 +645,11 @@
                     const countSpan = document.createElement('span');
                     countSpan.textContent = item.uniqueCveCount;
                     countSpan.className = 'clickable';
-                    countSpan.addEventListener('click', function() {
+                    countSpan.addEventListener('click', function(e) {
+                        e.stopPropagation();
                         row.classList.toggle('expanded');
                     });
                     cveCountCell.appendChild(countSpan);
-                    
-                    const cveDetails = document.createElement('div');
-                    cveDetails.className = 'cve-details';
-                    cveDetails.textContent = item.cveIds;
-                    cveCountCell.appendChild(cveDetails);
-                    
                     row.appendChild(cveCountCell);
                     
                     const criticalCell = document.createElement('td');
@@ -661,6 +669,23 @@
                     row.appendChild(lowCell);
                     
                     tbody.appendChild(row);
+                    
+                    // Details row
+                    const detailsRow = document.createElement('tr');
+                    detailsRow.className = 'cve-details-row transition';
+                    
+                    const detailsCell = document.createElement('td');
+                    detailsCell.colSpan = 6;
+                    detailsCell.className = 'cve-details-cell';
+                    detailsCell.textContent = item.cveIds;
+                    detailsRow.appendChild(detailsCell);
+                    
+                    tbody.appendChild(detailsRow);
+                    
+                    // Click handler for the entire row
+                    row.addEventListener('click', function() {
+                        row.classList.toggle('expanded');
+                    });
                 });
                 table.appendChild(tbody);
                 
@@ -668,7 +693,7 @@
                 serviceTableContainer.appendChild(table);
             }
             
-            // Display CVE view
+            // Display CVE view - with compact headers
             function displayCveView(data) {
                 if (!data.length) {
                     cveTableContainer.innerHTML = '<p>No CVE data to display</p>';
@@ -680,7 +705,7 @@
                 // Header
                 const thead = document.createElement('thead');
                 const headerRow = document.createElement('tr');
-                ['CVE ID', 'Severity', 'Affected Services', 'Service Count'].forEach(text => {
+                ['CVE ID', 'Severity', 'Affected Services', 'Count'].forEach(text => {
                     const th = document.createElement('th');
                     th.textContent = text;
                     headerRow.appendChild(th);
