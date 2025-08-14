@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
             line-height: 1.6;
@@ -94,6 +94,7 @@
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #ddd;
+            word-break: break-word;
         }
         th {
             background-color: #3498db;
@@ -171,7 +172,7 @@
             padding: 15px;
             border-radius: 6px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            height: 100px;
+            height: 120px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -180,9 +181,10 @@
             margin: 0 0 10px 0;
             color: #6c757d;
             font-size: 16px;
+            text-align: center;
         }
         .stat-value {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: bold;
             color: #3498db;
             text-align: center;
@@ -210,6 +212,9 @@
             font-size: 18px;
             font-weight: bold;
             color: #2c3e50;
+        }
+        .cve-id {
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -336,7 +341,7 @@
                 reader.readAsText(file);
             }
             
-            // Process CSV data
+            // Process CSV data - now only looks for required columns
             function processCSV(csvData) {
                 const lines = csvData.split('\n').filter(line => line.trim());
                 if (lines.length < 2) throw new Error('CSV must have header row and at least one data row');
@@ -421,7 +426,7 @@
                 }
             }
             
-            // Create service view data - removed highestSeverity tracking
+            // Create service view data - now includes unique CVE IDs
             function createServiceViewData(data) {
                 const serviceMap = new Map();
                 
@@ -430,6 +435,7 @@
                         serviceMap.set(item.serviceName, {
                             serviceName: item.serviceName,
                             uniqueCves: new Set(),
+                            cveIds: new Set(),
                             severityCounts: {
                                 Critical: 0,
                                 High: 0,
@@ -441,6 +447,7 @@
                     
                     const entry = serviceMap.get(item.serviceName);
                     entry.uniqueCves.add(item.cveId);
+                    entry.cveIds.add(item.cveId);
                     
                     // Update severity counts
                     const severity = getNormalizedSeverity(item.severity);
@@ -452,6 +459,7 @@
                 return Array.from(serviceMap.values()).map(entry => ({
                     serviceName: entry.serviceName,
                     uniqueCveCount: entry.uniqueCves.size,
+                    cveIds: Array.from(entry.cveIds).join(', '),
                     criticalCount: entry.severityCounts.Critical,
                     highCount: entry.severityCounts.High,
                     mediumCount: entry.severityCounts.Medium,
@@ -528,7 +536,7 @@
                 };
             }
             
-            // Display summary statistics
+            // Display summary statistics - now with equal-sized cards
             function displaySummaryStats(data) {
                 summaryStats.innerHTML = data.stats.map(item => `
                     <div class="stat-item">
@@ -543,7 +551,7 @@
                 `).join('');
             }
             
-            // Display service view - removed Highest Severity column
+            // Display service view - now with CVE IDs column
             function displayServiceView(data) {
                 if (!data.length) {
                     serviceTableContainer.innerHTML = '<p>No service data to display</p>';
@@ -555,7 +563,7 @@
                 // Header
                 const thead = document.createElement('thead');
                 const headerRow = document.createElement('tr');
-                ['Service Name', 'Unique CVEs', 'Critical', 'High', 'Medium', 'Low'].forEach(text => {
+                ['Service Name', 'Unique CVEs', 'CVE IDs', 'Critical', 'High', 'Medium', 'Low'].forEach(text => {
                     const th = document.createElement('th');
                     th.textContent = text;
                     headerRow.appendChild(th);
@@ -575,6 +583,10 @@
                     const cveCountCell = document.createElement('td');
                     cveCountCell.textContent = item.uniqueCveCount;
                     row.appendChild(cveCountCell);
+                    
+                    const cveIdsCell = document.createElement('td');
+                    cveIdsCell.textContent = item.cveIds;
+                    row.appendChild(cveIdsCell);
                     
                     const criticalCell = document.createElement('td');
                     criticalCell.textContent = item.criticalCount;
@@ -600,7 +612,7 @@
                 serviceTableContainer.appendChild(table);
             }
             
-            // Display CVE view - now sorted by severity first
+            // Display CVE view - now with expanded width for CVE IDs
             function displayCveView(data) {
                 if (!data.length) {
                     cveTableContainer.innerHTML = '<p>No CVE data to display</p>';
@@ -627,6 +639,7 @@
                     
                     const cveCell = document.createElement('td');
                     cveCell.textContent = item.cveId;
+                    cveCell.className = 'cve-id';
                     row.appendChild(cveCell);
                     
                     const severityCell = document.createElement('td');
