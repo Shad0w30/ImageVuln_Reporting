@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV Vulnerability Processor</title>
+    <title>CVE Vulnerability Analyzer</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             line-height: 1.6;
@@ -15,119 +15,236 @@
         h1 {
             color: #2c3e50;
             text-align: center;
+            margin-bottom: 30px;
         }
         .container {
             background-color: #f9f9f9;
             border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         .input-section, .output-section {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: bold;
+            font-size: 16px;
         }
         input[type="file"] {
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            margin-bottom: 20px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
             width: 100%;
+            font-size: 16px;
         }
         button {
             background-color: #3498db;
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
+            padding: 12px 20px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
+            margin-right: 10px;
         }
         button:hover {
             background-color: #2980b9;
+            transform: translateY(-2px);
         }
         button:disabled {
             background-color: #95a5a6;
             cursor: not-allowed;
+            transform: none;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+        .download-btn {
+            background-color: #27ae60;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
+        .download-btn:hover {
+            background-color: #219653;
         }
         .status {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 4px;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 16px;
         }
         .success {
             background-color: #d4edda;
             color: #155724;
+            border: 1px solid #c3e6cb;
         }
         .error {
             background-color: #f8d7da;
             color: #721c24;
+            border: 1px solid #f5c6cb;
         }
-        .download-btn {
-            background-color: #27ae60;
-            margin-top: 15px;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
-        .download-btn:hover {
-            background-color: #219653;
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #e6f7ff;
+        }
+        .tab-container {
+            margin-top: 20px;
+        }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            border: none;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab-button.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .summary-card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .summary-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .stat-item {
+            flex: 1;
+            min-width: 200px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stat-item h4 {
+            margin: 0 0 10px 0;
+            color: #6c757d;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>CSV Vulnerability Processor</h1>
+        <h1>CVE Vulnerability Analyzer</h1>
         
         <div class="input-section">
             <label for="csvFile">Upload CSV File:</label>
-            <input type="file" id="csvFile" accept=".csv">
+            <input type="file" id="csvFile" accept=".csv,.txt">
             <button id="processBtn" disabled>Process CSV</button>
             <div id="status" class="status" style="display: none;"></div>
         </div>
         
         <div class="output-section" id="outputSection" style="display: none;">
-            <h2>Processed Data</h2>
-            <div id="tableContainer"></div>
-            <button id="downloadBtn" class="download-btn">Download Processed CSV</button>
+            <div class="summary-card">
+                <h3>Vulnerability Summary</h3>
+                <div class="summary-stats" id="summaryStats">
+                    <!-- Stats will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-button active" data-tab="cveSummary">CVE Summary</button>
+                    <button class="tab-button" data-tab="detailedView">Detailed View</button>
+                </div>
+                
+                <div id="cveSummary" class="tab-content active">
+                    <div id="cveTableContainer"></div>
+                    <button id="downloadCveBtn" class="download-btn">Download CVE Summary</button>
+                </div>
+                
+                <div id="detailedView" class="tab-content">
+                    <div id="detailedTableContainer"></div>
+                    <button id="downloadDetailedBtn" class="download-btn">Download Detailed Data</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
             const csvFileInput = document.getElementById('csvFile');
             const processBtn = document.getElementById('processBtn');
-            const downloadBtn = document.getElementById('downloadBtn');
             const statusDiv = document.getElementById('status');
             const outputSection = document.getElementById('outputSection');
-            const tableContainer = document.getElementById('tableContainer');
+            const summaryStats = document.getElementById('summaryStats');
+            const cveTableContainer = document.getElementById('cveTableContainer');
+            const detailedTableContainer = document.getElementById('detailedTableContainer');
+            const downloadCveBtn = document.getElementById('downloadCveBtn');
+            const downloadDetailedBtn = document.getElementById('downloadDetailedBtn');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
             
+            // Data storage
             let processedData = [];
+            let cveSummaryData = [];
             
-            // Enable process button when file is selected
+            // Event listeners
             csvFileInput.addEventListener('change', function() {
                 processBtn.disabled = !this.files.length;
             });
             
-            // Process CSV file
-            processBtn.addEventListener('click', function() {
+            processBtn.addEventListener('click', processFile);
+            downloadCveBtn.addEventListener('click', () => downloadCSV(cveSummaryData, 'cve_summary'));
+            downloadDetailedBtn.addEventListener('click', () => downloadCSV(processedData, 'vulnerability_details'));
+            
+            // Tab switching
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    button.classList.add('active');
+                    document.getElementById(button.dataset.tab).classList.add('active');
+                });
+            });
+            
+            // Main processing function
+            function processFile() {
                 const file = csvFileInput.files[0];
                 if (!file) return;
                 
@@ -136,7 +253,12 @@
                     try {
                         const csvData = e.target.result;
                         processedData = processCSV(csvData);
-                        displayResults(processedData);
+                        cveSummaryData = createCveSummary(processedData);
+                        
+                        displaySummaryStats(processedData, cveSummaryData);
+                        displayCveSummaryTable(cveSummaryData);
+                        displayDetailedTable(processedData);
+                        
                         showStatus('CSV processed successfully!', 'success');
                         outputSection.style.display = 'block';
                     } catch (error) {
@@ -148,64 +270,33 @@
                     showStatus('Error reading file', 'error');
                 };
                 reader.readAsText(file);
-            });
-            
-            // Download processed CSV
-            downloadBtn.addEventListener('click', function() {
-                if (!processedData.length) return;
-                
-                const csvContent = convertToCSV(processedData);
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'processed_vulnerabilities.csv');
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            });
+            }
             
             // Process CSV data
             function processCSV(csvData) {
                 const lines = csvData.split('\n').filter(line => line.trim());
-                if (lines.length < 2) {
-                    throw new Error('CSV file must have at least one header row and one data row');
-                }
-
-                // Try both tab and comma delimiters
+                if (lines.length < 2) throw new Error('CSV must have header row and at least one data row');
+                
+                // Detect delimiter (tab or comma)
                 let delimiter = '\t';
                 let headers = lines[0].split(delimiter).map(h => h.trim());
-                
                 if (headers.length < 4) {
                     delimiter = ',';
                     headers = lines[0].split(delimiter).map(h => h.trim());
                 }
                 
-                console.log('Found headers:', headers);
-                
-                // Find column indices (case sensitive)
+                // Find column indices
                 const vulnIdIndex = headers.indexOf('vulnId');
                 const resourceIdIndex = headers.indexOf('resourceId');
                 const descriptionIndex = headers.indexOf('description');
                 const severityIndex = headers.indexOf('severity');
                 
-                if (vulnIdIndex === -1 || resourceIdIndex === -1 || descriptionIndex === -1 || severityIndex === -1) {
-                    const missingColumns = [
-                        vulnIdIndex === -1 ? 'vulnId' : null,
-                        resourceIdIndex === -1 ? 'resourceId' : null,
-                        descriptionIndex === -1 ? 'description' : null,
-                        severityIndex === -1 ? 'severity' : null
-                    ].filter(Boolean);
-                    
-                    throw new Error(
-                        `Required columns not found. Missing: ${missingColumns.join(', ')}\n` +
-                        `Found columns: ${headers.join(', ')}\n` +
-                        `Using delimiter: ${delimiter === '\t' ? 'tab' : 'comma'}`
-                    );
+                if ([vulnIdIndex, resourceIdIndex, descriptionIndex, severityIndex].some(i => i === -1)) {
+                    throw new Error(`Required columns not found. Found: ${headers.join(', ')}`);
                 }
                 
                 const results = [];
+                const uniqueResources = new Set();
                 
                 for (let i = 1; i < lines.length; i++) {
                     if (!lines[i].trim()) continue;
@@ -218,10 +309,8 @@
                     
                     if (!vulnId || !resourceId || !description) continue;
                     
-                    // Process service name
-                    let serviceName = extractServiceName(resourceId);
-                    
-                    // Extract vulnerable package from description
+                    // Extract service name from resourceId
+                    const serviceName = extractServiceName(resourceId);
                     const vulnerablePackage = extractVulnerablePackage(description);
                     
                     results.push({
@@ -229,84 +318,139 @@
                         serviceName: serviceName,
                         cveId: vulnId,
                         severity: severity,
-                        vulnerablePackage: vulnerablePackage
+                        vulnerablePackage: vulnerablePackage,
+                        fullResourceId: resourceId
                     });
+                    
+                    uniqueResources.add(resourceId);
                 }
                 
-                // Sort by service name
-                results.sort((a, b) => a.serviceName.localeCompare(b.serviceName));
-                
-                return results;
+                return results.sort((a, b) => a.cveId.localeCompare(b.cveId));
             }
             
             // Extract service name from resourceId
             function extractServiceName(resourceId) {
-                // Get the part after last slash
-                const lastSegment = resourceId.split('/').pop();
-                
-                // Extract the part after 'cibg-' and before 'service'
-                const regex = /cibg-(.*?)service/i;
-                const match = lastSegment.match(regex);
-                
-                if (match && match[1]) {
-                    let namePart = match[1].trim();
+                try {
+                    // Get the part after last slash
+                    const lastSegment = resourceId.split('/').pop();
                     
-                    // Remove trailing hyphens or underscores
-                    namePart = namePart.replace(/[-_]+$/, '');
+                    // Extract between 'cibg-' and 'service'
+                    const match = lastSegment.match(/cibg-(.*?)(?:service|$)/i);
+                    if (!match || !match[1]) return 'Unknown Service';
                     
-                    // Replace hyphens with spaces and capitalize first letters
-                    namePart = namePart.replace(/-/g, ' ')
-                                      .split(' ')
-                                      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                                      .join(' ');
+                    let namePart = match[1]
+                        .replace(/[-_]+$/, '') // Remove trailing separators
+                        .replace(/-/g, ' ')   // Replace hyphens with spaces
+                        .trim();
                     
-                    return namePart;
+                    // Capitalize first letter of each word
+                    namePart = namePart.split(' ')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                        .join(' ');
+                    
+                    return namePart || 'Unknown Service';
+                } catch (e) {
+                    console.error('Error extracting service name:', e);
+                    return 'Unknown Service';
                 }
-                
-                return resourceId; // fallback if pattern not matched
             }
             
             // Extract vulnerable package from description
             function extractVulnerablePackage(description) {
-                // Try to find package names in common patterns
                 const patterns = [
                     /(?:package|library|module)\s+["']?([a-zA-Z0-9\-_\.]+)["']?/i,
                     /(?:in|of)\s+["']?([a-zA-Z0-9\-_\.]+)["']?\s+(?:package|library|module)/i,
-                    /vulnerability\s+in\s+["']?([a-zA-Z0-9\-_\.]+)["']?/i,
-                    /(?:update|upgrade)\s+["']?([a-zA-Z0-9\-_\.]+)["']?\s+to/i
+                    /vulnerability\s+in\s+["']?([a-zA-Z0-9\-_\.]+)["']?/i
                 ];
                 
                 for (const pattern of patterns) {
                     const match = description.match(pattern);
-                    if (match && match[1]) {
-                        return match[1].trim();
-                    }
+                    if (match && match[1]) return match[1].trim();
                 }
                 
-                // Fallback: look for words that might be package names
+                // Fallback: find first word that looks like a package name
                 const words = description.split(/\s+/);
-                const candidates = words.filter(word => 
-                    word.match(/^[a-z0-9\-_\.]+$/i) && // basic package name pattern
-                    word.length > 3 && // exclude very short words
-                    !word.match(/^[0-9\.]+$/) // exclude version numbers
+                const pkg = words.find(word => 
+                    word.match(/^[a-z0-9\-_\.]+$/i) && 
+                    word.length > 3 &&
+                    !word.match(/^[0-9\.]+$/)
                 );
                 
-                return candidates[0] || description.substring(0, 30) + '...';
+                return pkg || description.substring(0, 30).trim() + (description.length > 30 ? '...' : '');
             }
             
-            // Display results in a table
-            function displayResults(data) {
+            // Create CVE summary data
+            function createCveSummary(data) {
+                const cveMap = new Map();
+                
+                data.forEach(item => {
+                    if (!cveMap.has(item.cveId)) {
+                        cveMap.set(item.cveId, {
+                            cveId: item.cveId,
+                            severity: item.severity,
+                            affectedServices: new Set(),
+                            affectedPackages: new Set(),
+                            count: 0
+                        });
+                    }
+                    
+                    const entry = cveMap.get(item.cveId);
+                    entry.affectedServices.add(item.serviceName);
+                    entry.affectedPackages.add(item.vulnerablePackage);
+                    entry.count++;
+                });
+                
+                return Array.from(cveMap.values()).map(entry => ({
+                    cveId: entry.cveId,
+                    severity: entry.severity,
+                    affectedServiceCount: entry.affectedServices.size,
+                    affectedServices: Array.from(entry.affectedServices).join(', '),
+                    affectedPackageCount: entry.affectedPackages.size,
+                    affectedPackages: Array.from(entry.affectedPackages).join(', '),
+                    totalOccurrences: entry.count
+                })).sort((a, b) => b.affectedServiceCount - a.affectedServiceCount);
+            }
+            
+            // Display summary statistics
+            function displaySummaryStats(detailedData, summaryData) {
+                const uniqueCves = new Set(detailedData.map(item => item.cveId)).size;
+                const uniqueServices = new Set(detailedData.map(item => item.serviceName)).size;
+                const criticalCount = summaryData.filter(item => item.severity === 'Critical').length;
+                const highCount = summaryData.filter(item => item.severity === 'High').length;
+                
+                summaryStats.innerHTML = `
+                    <div class="stat-item">
+                        <h4>Total CVEs</h4>
+                        <div class="stat-value">${uniqueCves}</div>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Affected Services</h4>
+                        <div class="stat-value">${uniqueServices}</div>
+                    </div>
+                    <div class="stat-item">
+                        <h4>Critical Vulnerabilities</h4>
+                        <div class="stat-value">${criticalCount}</div>
+                    </div>
+                    <div class="stat-item">
+                        <h4>High Vulnerabilities</h4>
+                        <div class="stat-value">${highCount}</div>
+                    </div>
+                `;
+            }
+            
+            // Display CVE summary table
+            function displayCveSummaryTable(data) {
                 if (!data.length) {
-                    tableContainer.innerHTML = '<p>No data to display</p>';
+                    cveTableContainer.innerHTML = '<p>No CVE data to display</p>';
                     return;
                 }
                 
                 const table = document.createElement('table');
                 
-                // Create header
+                // Header
                 const thead = document.createElement('thead');
                 const headerRow = document.createElement('tr');
-                ['Serial Number', 'Service Name', 'CVE ID', 'Severity', 'Vulnerable Package'].forEach(text => {
+                ['CVE ID', 'Severity', 'Affected Services', 'Service Count', 'Affected Packages', 'Package Count', 'Total Occurrences'].forEach(text => {
                     const th = document.createElement('th');
                     th.textContent = text;
                     headerRow.appendChild(th);
@@ -314,18 +458,10 @@
                 thead.appendChild(headerRow);
                 table.appendChild(thead);
                 
-                // Create body
+                // Body
                 const tbody = document.createElement('tbody');
                 data.forEach(item => {
                     const row = document.createElement('tr');
-                    
-                    const snCell = document.createElement('td');
-                    snCell.textContent = item.serialNumber;
-                    row.appendChild(snCell);
-                    
-                    const serviceCell = document.createElement('td');
-                    serviceCell.textContent = item.serviceName;
-                    row.appendChild(serviceCell);
                     
                     const cveCell = document.createElement('td');
                     cveCell.textContent = item.cveId;
@@ -333,34 +469,122 @@
                     
                     const severityCell = document.createElement('td');
                     severityCell.textContent = item.severity;
+                    severityCell.style.fontWeight = item.severity === 'Critical' ? 'bold' : '';
+                    severityCell.style.color = item.severity === 'Critical' ? '#d63031' : 
+                                            item.severity === 'High' ? '#e17055' : '';
                     row.appendChild(severityCell);
                     
-                    const packageCell = document.createElement('td');
-                    packageCell.textContent = item.vulnerablePackage;
-                    row.appendChild(packageCell);
+                    const servicesCell = document.createElement('td');
+                    servicesCell.textContent = item.affectedServices;
+                    row.appendChild(servicesCell);
+                    
+                    const serviceCountCell = document.createElement('td');
+                    serviceCountCell.textContent = item.affectedServiceCount;
+                    row.appendChild(serviceCountCell);
+                    
+                    const packagesCell = document.createElement('td');
+                    packagesCell.textContent = item.affectedPackages;
+                    row.appendChild(packagesCell);
+                    
+                    const packageCountCell = document.createElement('td');
+                    packageCountCell.textContent = item.affectedPackageCount;
+                    row.appendChild(packageCountCell);
+                    
+                    const countCell = document.createElement('td');
+                    countCell.textContent = item.totalOccurrences;
+                    row.appendChild(countCell);
                     
                     tbody.appendChild(row);
                 });
                 table.appendChild(tbody);
                 
-                tableContainer.innerHTML = '';
-                tableContainer.appendChild(table);
+                cveTableContainer.innerHTML = '';
+                cveTableContainer.appendChild(table);
             }
             
-            // Convert processed data to CSV
-            function convertToCSV(data) {
-                if (!data.length) return '';
+            // Display detailed table
+            function displayDetailedTable(data) {
+                if (!data.length) {
+                    detailedTableContainer.innerHTML = '<p>No detailed data to display</p>';
+                    return;
+                }
                 
-                const headers = ['Serial Number', 'Service Name', 'CVE ID', 'Severity', 'Vulnerable Package'];
-                const rows = data.map(item => [
-                    item.serialNumber,
-                    `"${item.serviceName}"`,
-                    item.cveId,
-                    item.severity,
-                    `"${item.vulnerablePackage}"`
-                ]);
+                const table = document.createElement('table');
                 
-                return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+                // Header
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                ['CVE ID', 'Severity', 'Service Name', 'Vulnerable Package', 'Resource ID'].forEach(text => {
+                    const th = document.createElement('th');
+                    th.textContent = text;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                // Body
+                const tbody = document.createElement('tbody');
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    
+                    const cveCell = document.createElement('td');
+                    cveCell.textContent = item.cveId;
+                    row.appendChild(cveCell);
+                    
+                    const severityCell = document.createElement('td');
+                    severityCell.textContent = item.severity;
+                    severityCell.style.fontWeight = item.severity === 'Critical' ? 'bold' : '';
+                    severityCell.style.color = item.severity === 'Critical' ? '#d63031' : 
+                                            item.severity === 'High' ? '#e17055' : '';
+                    row.appendChild(severityCell);
+                    
+                    const serviceCell = document.createElement('td');
+                    serviceCell.textContent = item.serviceName;
+                    row.appendChild(serviceCell);
+                    
+                    const packageCell = document.createElement('td');
+                    packageCell.textContent = item.vulnerablePackage;
+                    row.appendChild(packageCell);
+                    
+                    const resourceCell = document.createElement('td');
+                    resourceCell.textContent = item.fullResourceId;
+                    resourceCell.style.maxWidth = '300px';
+                    resourceCell.style.overflow = 'hidden';
+                    resourceCell.style.textOverflow = 'ellipsis';
+                    resourceCell.style.whiteSpace = 'nowrap';
+                    resourceCell.title = item.fullResourceId;
+                    row.appendChild(resourceCell);
+                    
+                    tbody.appendChild(row);
+                });
+                table.appendChild(tbody);
+                
+                detailedTableContainer.innerHTML = '';
+                detailedTableContainer.appendChild(table);
+            }
+            
+            // Download CSV
+            function downloadCSV(data, filenamePrefix) {
+                if (!data.length) return;
+                
+                const headers = Object.keys(data[0]);
+                const csvContent = [
+                    headers.join(','),
+                    ...data.map(row => 
+                        headers.map(fieldName => 
+                            `"${String(row[fieldName] || '').replace(/"/g, '""')}"`
+                        ).join(',')
+                    )
+                ].join('\n');
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.setAttribute('href', url);
+                link.setAttribute('download', `${filenamePrefix}_${new Date().toISOString().slice(0,10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
             
             // Show status message
