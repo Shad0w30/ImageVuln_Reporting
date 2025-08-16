@@ -274,10 +274,10 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .stat-value.critical { background: linear-gradient(135deg, #991b1b, #dc2626); }
-        .stat-value.high { background: linear-gradient(135deg, #dc2626, #f87171); }
-        .stat-value.medium { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
-        .stat-value.low { background: linear-gradient(135deg, #22c55e, #16a34a); }
+        .stat-value.critical { background: linear-gradient(135deg, #991b1b, #dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-value.high { background: linear-gradient(135deg, #dc2626, #f87171); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-value.medium { background: linear-gradient(135deg, #f59e0b, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-value.low { background: linear-gradient(135deg, #22c55e, #16a34a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
         .table-header {
             display: flex;
@@ -597,11 +597,16 @@
                 let delimiter = lines[0].includes('\t') ? '\t' : ',';
                 const headers = lines[0].split(delimiter).map(h => h.trim());
 
-                // Define expected columns
-                const expectedColumns = {
+                // Define required columns
+                const requiredColumns = {
                     severity: ['severity', 'vulnerability severity', 'risk', 'risk level'],
-                    vulnId: ['vulnid', 'vuln id', 'cve', 'cveid', 'cve id'],
-                    repositoryName: ['repositoryname', 'repository name', 'repository', 'repo', 'servicename']
+                    vulnId: ['vulnid', 'vuln id', 'cve', 'cveid', 'cve id']
+                };
+
+                // Service identifier columns
+                const serviceColumns = {
+                    repositoryName: ['repositoryname', 'repository name', 'repository', 'repo', 'servicename'],
+                    resourceId: ['resourceid', 'resource id', 'resource']
                 };
 
                 // Optional columns
@@ -626,45 +631,58 @@
 
                 const indices = {};
                 const foundColumns = [];
-                const missingRequiredColumns = [];
-                const missingOptionalColumns = [];
+                let missingRequired = [];
+                let mode = null; // 'repository' or 'resource'
 
                 // Check required columns
-                for (const [key, possibleNames] of Object.entries(expectedColumns)) {
+                for (const [key, possibleNames] of Object.entries(requiredColumns)) {
                     indices[key] = findColumnIndex(possibleNames);
                     if (indices[key] === -1) {
-                        missingRequiredColumns.push(`${key} (expected: ${possibleNames.join(', ')})`);
+                        missingRequired.push(`${key} (expected: ${possibleNames.join(', ')})`);
                     } else {
                         foundColumns.push(headers[indices[key]]);
                     }
                 }
 
+                if (missingRequired.length > 0) {
+                    throw new Error(`Missing required columns: ${missingRequired.join(', ')}. Found columns: ${headers.join(', ')}`);
+                }
+
+                // Check for service identifier
+                indices.repositoryName = findColumnIndex(serviceColumns.repositoryName);
+                if (indices.repositoryName !== -1) {
+                    mode = 'repository';
+                    foundColumns.push(headers[indices.repositoryName]);
+                } else {
+                    indices.resourceId = findColumnIndex(serviceColumns.resourceId);
+                    if (indices.resourceId !== -1) {
+                        mode = 'resource';
+                        foundColumns.push(headers[indices.resourceId]);
+                    } else {
+                        throw new Error(`Missing service identifier column: repositoryName or resourceId required. Found columns: ${headers.join(', ')}`);
+                    }
+                }
+
                 // Check optional columns
+                const missingOptional = [];
                 for (const [key, possibleNames] of Object.entries(optionalColumns)) {
                     indices[key] = findColumnIndex(possibleNames);
                     if (indices[key] !== -1) {
                         foundColumns.push(headers[indices[key]]);
                     } else {
-                        missingOptionalColumns.push(`${key} (expected: ${possibleNames.join(', ')})`);
+                        missingOptional.push(`${key} (expected: ${possibleNames.join(', ')})`);
                     }
                 }
 
                 // Report column status
-                let statusMessage = `Found columns: ${foundColumns.join(', ') || 'none'}`;
-                if (missingRequiredColumns.length > 0) {
-                    throw new Error(`${statusMessage}\nMissing required columns: ${missingRequiredColumns.join(', ')}`);
-                }
-                if (missingOptionalColumns.length > 0) {
-                    statusMessage += `\nOptional columns not found (using defaults): ${missingOptionalColumns.join(', ')}`;
+                let statusMessage = `Found columns: ${foundColumns.join(', ') || 'none'}. Using mode: ${mode}`;
+                if (missingOptional.length > 0) {
+                    statusMessage += `\nOptional columns not found (using defaults): ${missingOptional.join(', ')}`;
                 }
                 console.log(statusMessage);
 
                 const nonNginxData = [];
                 const nginxData = [];
-                const uniqueCves = new Set();
-                const uniqueServices = new Set();
-                const nginxUniqueCves = new Set();
-                const nginxUniqueServices = new Set();
 
                 for (let i = 1; i < lines.length; i++) {
                     if (!lines[i].trim()) continue;
@@ -673,7 +691,6 @@
                     const rowData = {
                         severity: values[indices.severity]?.trim(),
                         vulnId: values[indices.vulnId]?.trim(),
-                        repositoryName: values[indices.repositoryName]?.trim(),
                         packageName: values[indices.packageName]?.trim() || 'N/A',
                         category: values[indices.category]?.trim() || 'N/A',
                         version: values[indices.version]?.trim() || 'N/A',
@@ -682,12 +699,26 @@
                         fixStatus: values[indices.fixStatus]?.trim() || 'N/A'
                     };
 
-                    if (!rowData.severity || !rowData.vulnId || !rowData.repositoryName) continue;
+                    let serviceIdentifier;
+                    if (mode === 'repository') {
+                        serviceIdentifier = values[indices.repositoryName]?.trim();
+                    } else if (mode === 'resource') {
+                        serviceIdentifier = values[indices.resourceId]?.trim();
+                    }
 
-                    // Extract service name
-                    const serviceName = rowData.repositoryName.includes('/')
-                        ? rowData.repositoryName.split('/').pop()
-                        : rowData.repositoryName;
+                    if (!rowData.severity || !rowData.vulnId || !serviceIdentifier) continue;
+
+                    // Extract service name based on mode
+                    let serviceName = 'Unknown Service';
+                    if (mode === 'repository') {
+                        serviceName = serviceIdentifier.includes('/')
+                            ? serviceIdentifier.split('/').pop()
+                            : serviceIdentifier;
+                    } else if (mode === 'resource') {
+                        // Parse between 'cibg-' and '-service'
+                        const match = serviceIdentifier.match(/cibg-(.*?)-service/i);
+                        serviceName = match && match[1] ? match[1] : serviceIdentifier;
+                    }
 
                     const item = {
                         serviceName,
@@ -699,18 +730,14 @@
                         fixedVersion: rowData.fixedVersion,
                         vendor: rowData.vendor,
                         fixStatus: rowData.fixStatus,
-                        fullRepositoryName: rowData.repositoryName
+                        fullRepositoryName: serviceIdentifier
                     };
 
                     // Separate Nginx and non-Nginx data
-                    if (rowData.repositoryName.toLowerCase().includes('nginx')) {
+                    if (serviceIdentifier.toLowerCase().includes('nginx')) {
                         nginxData.push(item);
-                        nginxUniqueCves.add(rowData.vulnId);
-                        nginxUniqueServices.add(serviceName);
                     } else {
                         nonNginxData.push(item);
-                        uniqueCves.add(rowData.vulnId);
-                        uniqueServices.add(serviceName);
                     }
                 }
 
