@@ -721,11 +721,14 @@
                             ? serviceIdentifier.split('/').pop()
                             : serviceIdentifier;
                     } else if (mode === 'resource') {
-                        const match = serviceIdentifier.match(/cibg-(.*?)-service/i);
-                        if (match && match[1]) {
-                            serviceName = match[1];
+                        // Try to match cibg-<serviceName>-service
+                        const cibgMatch = serviceIdentifier.match(/cibg-(.*?)-service/i);
+                        if (cibgMatch && cibgMatch[1]) {
+                            serviceName = cibgMatch[1];
                         } else {
-                            throw new Error(`Invalid resourceId format in row ${i + 1}: ${serviceIdentifier}. Expected format: cibg-<serviceName>-service`);
+                            // Fallback to extracting name after last '/' and before '-image'
+                            const imageMatch = serviceIdentifier.match(/([^/]+?)(?:-image|$)/i);
+                            serviceName = imageMatch && imageMatch[1] ? imageMatch[1] : serviceIdentifier;
                         }
                     }
 
