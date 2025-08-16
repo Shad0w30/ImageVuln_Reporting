@@ -3,273 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vulnerability Reporting Dashboard</title>
+    <title>Vulnerability Dashboard</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
         :root {
-            --primary-color: #2563eb;
-            --success-color: #16a34a;
-            --error-color: #dc2626;
+            --primary-color: #3b82f6;
+            --secondary-color: #8b5cf6;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
             --warning-color: #f59e0b;
-            --text-color: #1f2937;
-            --bg-color: #f8fafc;
+            --text-color: #111827;
+            --bg-color: #f1f5f9;
             --card-bg: #ffffff;
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+            --gradient-bg: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', sans-serif;
             max-width: 1600px;
             margin: 0 auto;
-            padding: 24px;
-            background-color: var(--bg-color);
+            padding: 2rem;
+            background: var(--bg-color);
             color: var(--text-color);
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         h1 {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
             text-align: center;
-            color: var(--text-color);
-            margin-bottom: 2rem;
+            background: var(--gradient-bg);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2.5rem;
+            animation: fadeIn 1s ease-in;
         }
 
         .container {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: var(--shadow);
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .input-section, .output-section {
-            margin-bottom: 1.5rem;
+        .container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .input-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
         }
 
         label {
-            display: block;
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            display: block;
             color: var(--text-color);
         }
 
         input[type="file"] {
             width: 100%;
             padding: 12px;
- “
-
-System: I notice you requested the complete code in a "nice HTML format including all the CSS and improved JS." Since I was in the process of generating the response and it seems to have been cut off, I'll provide the full, improved version of the Vulnerability Reporting Dashboard with enhanced CSS and JavaScript, incorporating the requested changes to the CSV processing logic. The updated `processCSV` function will now check for all expected columns, report found and missing columns, and only fail if required columns are missing, regardless of their order.
-
-<xaiArtifact artifact_id="e149107e-d9d6-453e-95b1-73dddbcb230f" artifact_version_id="ee2c1a01-76f8-4e7e-ba48-e819349d8441" title="index.html" contentType="text/html">
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vulnerability Reporting Dashboard</title>
-    <style>
-        :root {
-            --primary-color: #2563eb;
-            --success-color: #16a34a;
-            --error-color: #dc2626;
-            --warning-color: #f59e0b;
-            --text-color: #1f2937;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            --border-color: #e5e7eb;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 24px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.5;
-        }
-
-        h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            text-align: center;
-            color: var(--text-color);
-            margin-bottom: 2rem;
-        }
-
-        .container {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-        }
-
-        .input-section, .output-section {
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
             font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--text-color);
-        }
-
-        input[type="file"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            background-color: var(--card-bg);
-            transition: border-color 0.2s ease;
+            background: #fff;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         input[type="file"]:focus {
             outline: none;
             border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
 
         button {
-            background-color: var(--primary-color);
+            background: var(--gradient-bg);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
+            padding: 12px 24px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: background-color 0.2s ease;
-            margin-right: 8px;
-            margin-bottom: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         button:hover:not(:disabled) {
-            background-color: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         button:disabled {
-            background-color: #9ca3af;
+            background: #9ca3af;
             cursor: not-allowed;
             opacity: 0.7;
         }
 
         .download-btn {
-            background-color: var(--success-color);
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
         }
 
         .download-btn:hover:not(:disabled) {
-            background-color: #15803d;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
         }
 
         .status {
-            margin: 1rem 0;
-            padding: 12px;
-            border-radius: 6px;
-            font-size: 0.9rem;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
             display: none;
+            animation: slideIn 0.5s ease;
         }
 
         .success {
-            background-color: #dcfce7;
+            background: #dcfce7;
             color: #166534;
             border: 1px solid #bbf7d0;
         }
 
         .error {
-            background-color: #fee2e2;
+            background: #fee2e2;
             color: var(--error-color);
             border: 1px solid #fecaca;
         }
 
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin: 0.5rem 0 1.5rem 0;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1rem 0;
             font-size: 0.9rem;
-            box-shadow: var(--shadow);
-            border-radius: 6px;
+            background: #fff;
+            border-radius: 12px;
             overflow: hidden;
+            box-shadow: var(--shadow-sm);
         }
 
         th, td {
-            padding: 12px;
+            padding: 14px;
             text-align: left;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid #e5e7eb;
         }
 
         th {
-            background-color: var(--primary-color);
+            background: var(--gradient-bg);
             color: white;
+            font-weight: 600;
             position: sticky;
             top: 0;
-            font-weight: 600;
-            white-space: nowrap;
+            z-index: 10;
         }
 
-        tr:nth-child(even) {
-            background-color: #f9fafb;
+        tr {
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         tr:hover {
-            background-color: #eff6ff;
+            background: #eff6ff;
+            transform: translateX(4px);
         }
 
-        .severity-critical {
-            color: #991b1b;
-            font-weight: 600;
-        }
-
-        .severity-high {
-            color: var(--error-color);
-            font-weight: 600;
-        }
-
-        .severity-medium {
-            color: var(--warning-color);
-            font-weight: 600;
-        }
-
-        .severity-low {
-            color: var(--success-color);
-            font-weight: 600;
-        }
+        .severity-critical { color: #991b1b; font-weight: 600; }
+        .severity-high { color: var(--error-color); font-weight: 600; }
+        .severity-medium { color: var(--warning-color); font-weight: 600; }
+        .severity-low { color: var(--success-color); font-weight: 600; }
 
         .tab-container {
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
 
         .tab-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 1rem;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .tab-button {
-            padding: 10px 20px;
-            background-color: #e5e7eb;
+            padding: 10px 24px;
+            background: #e5e7eb;
             border: none;
+            border-radius: 30px;
             cursor: pointer;
-            border-radius: 6px;
             font-size: 0.9rem;
             font-weight: 500;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         .tab-button.active {
-            background-color: var(--primary-color);
+            background: var(--gradient-bg);
             color: white;
         }
 
         .tab-button:hover:not(.active) {
-            background-color: #d1d5db;
+            background: #d1d5db;
+            transform: translateY(-2px);
         }
 
         .tab-content {
             display: none;
+            animation: fadeIn 0.5s ease;
         }
 
         .tab-content.active {
@@ -277,67 +222,72 @@ System: I notice you requested the complete code in a "nice HTML format includin
         }
 
         .summary-card {
-            background: var(--card-bg);
-            border-radius: 8px;
+            background: #fff;
+            border-radius: 12px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-4px);
         }
 
         .summary-card h3 {
-            margin: 0 0 1rem 0;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 600;
+            margin: 0 0 1rem;
             color: var(--text-color);
         }
 
-        .summary-grid {
+        .summary-grid, .severity-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .severity-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1rem;
         }
 
         .stat-item {
-            background: #f9fafb;
-            padding: 1rem;
-            border-radius: 6px;
+            background: linear-gradient(145deg, #f9fafb, #e5e7eb);
+            padding: 1.2rem;
+            border-radius: 10px;
             text-align: center;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s ease;
+        }
+
+        .stat-item:hover {
+            transform: scale(1.03);
         }
 
         .stat-item h4 {
-            margin: 0 0 0.5rem 0;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #6b7280;
+            margin: 0 0 0.5rem;
         }
 
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            color: var(--primary-color);
+            background: var(--gradient-bg);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .stat-value.critical { color: #991b1b; }
-        .stat-value.high { color: var(--error-color); }
-        .stat-value.medium { color: var(--warning-color); }
-        .stat-value.low { color: var(--success-color); }
+        .stat-value.critical { background: linear-gradient(135deg, #991b1b, #dc2626); }
+        .stat-value.high { background: linear-gradient(135deg, #dc2626, #f87171); }
+        .stat-value.medium { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+        .stat-value.low { background: linear-gradient(135deg, #22c55e, #16a34a); }
 
         .table-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
 
         .table-title {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 600;
             color: var(--text-color);
         }
@@ -352,52 +302,60 @@ System: I notice you requested the complete code in a "nice HTML format includin
             color: var(--primary-color);
             font-weight: 600;
             text-decoration: underline;
+            transition: color 0.2s ease;
+        }
+
+        .clickable:hover {
+            color: var(--secondary-color);
         }
 
         .cve-details-row {
             display: none;
-            background-color: #f9fafb;
+            background: #f9fafb;
         }
 
         .cve-details-cell {
-            padding: 12px;
+            padding: 14px;
             word-break: break-word;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
         .expanded + .cve-details-row {
             display: table-row;
+            animation: slideIn 0.3s ease;
         }
 
         .expanded {
-            background-color: #eff6ff;
+            background: #eff6ff;
         }
 
         .nginx-container {
-            margin-top: 1.5rem;
+            margin-top: 2rem;
         }
 
         .nginx-toggle {
-            background-color: #f9fafb;
-            border: 1px solid var(--border-color);
-            padding: 12px 16px;
-            border-radius: 6px;
+            background: linear-gradient(145deg, #f9fafb, #e5e7eb);
+            border: none;
+            padding: 14px 20px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: 600;
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
         }
 
         .nginx-toggle:hover {
-            background-color: #e5e7eb;
+            background: linear-gradient(145deg, #e5e7eb, #d1d5db);
+            transform: translateY(-2px);
         }
 
         .nginx-toggle:after {
             content: '+';
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 700;
         }
 
@@ -407,14 +365,15 @@ System: I notice you requested the complete code in a "nice HTML format includin
 
         .nginx-content {
             display: none;
-            padding: 12px;
-            background-color: var(--card-bg);
-            border-radius: 6px;
-            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
         }
 
         .nginx-content.expanded {
             display: block;
+            animation: fadeIn 0.5s ease;
         }
 
         .spinner {
@@ -422,15 +381,25 @@ System: I notice you requested the complete code in a "nice HTML format includin
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--primary-color);
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             animation: spin 1s linear infinite;
-            margin: 1rem auto;
+            margin: 1.5rem auto;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
         }
     </style>
 </head>
@@ -439,7 +408,7 @@ System: I notice you requested the complete code in a "nice HTML format includin
         <h1>Vulnerability Reporting Dashboard</h1>
         
         <div class="input-section">
-            <label for="csvFile">Upload CSV File:</label>
+            <label for="csvFile">Upload Vulnerability CSV:</label>
             <input type="file" id="csvFile" accept=".csv,.txt">
             <button id="processBtn" disabled>Process CSV</button>
             <div id="status" class="status"></div>
@@ -551,526 +520,4 @@ System: I notice you requested the complete code in a "nice HTML format includin
                 elements.downloadNginxCveBtn.addEventListener('click', () => downloadCSV(dataStore.nginxCveViewData, 'nginx_cve_view'));
 
                 elements.tabButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        elements.tabButtons.forEach(btn => btn.classList.remove('active'));
-                        elements.tabContents.forEach(content => content.classList.remove('active'));
-                        button.classList.add('active');
-                        document.getElementById(button.dataset.tab).classList.add('active');
-                    });
-                });
-
-                elements.nginxToggles.forEach(toggle => {
-                    toggle.addEventListener('click', () => {
-                        const targetId = toggle.getAttribute('data-target');
-                        const target = document.getElementById(targetId);
-                        toggle.classList.toggle('expanded');
-                        target.classList.toggle('expanded');
-                    });
-                });
-            }
-
-            // Main processing function
-            async function processFile() {
-                const file = elements.csvFileInput.files[0];
-                if (!file) return;
-
-                elements.processBtn.disabled = true;
-                elements.spinner.style.display = 'block';
-                elements.statusDiv.style.display = 'none';
-
-                try {
-                    const csvData = await readFile(file);
-                    const { nonNginxData, nginxData } = processCSV(csvData);
-                    dataStore.processedData = nonNginxData;
-                    dataStore.nginxData = nginxData;
-
-                    // Prepare data for different views
-                    dataStore.serviceViewData = createServiceViewData(nonNginxData);
-                    dataStore.cveViewData = createCveViewData(nonNginxData);
-                    dataStore.nginxCveViewData = createCveViewData(nginxData);
-                    dataStore.summaryData = createSummaryData(nonNginxData, dataStore.cveViewData);
-                    dataStore.nginxSummaryData = createSummaryData(nginxData, dataStore.nginxCveViewData);
-
-                    // Display all views
-                    displaySummaryStats(dataStore.summaryData);
-                    displayNginxSummaryStats(dataStore.nginxSummaryData);
-                    displayServiceView(dataStore.serviceViewData);
-                    displayCveView(dataStore.cveViewData);
-                    displayNginxCveView(dataStore.nginxCveViewData);
-
-                    showStatus('CSV processed successfully!', 'success');
-                    elements.outputSection.style.display = 'block';
-                } catch (error) {
-                    showStatus(`Error processing CSV: ${error.message}`, 'error');
-                    console.error(error);
-                } finally {
-                    elements.processBtn.disabled = false;
-                    elements.spinner.style.display = 'none';
-                }
-            }
-
-            // Read file asynchronously
-            function readFile(file) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = () => reject(new Error('Error reading file'));
-                    reader.readAsText(file);
-                });
-            }
-
-            // Process CSV data
-            function processCSV(csvData) {
-                const lines = csvData.split('\n').filter(line => line.trim());
-                if (lines.length < 2) throw new Error('CSV must have header row and at least one data row');
-
-                // Detect delimiter
-                let delimiter = lines[0].includes('\t') ? '\t' : ',';
-                const headers = lines[0].split(delimiter).map(h => h.trim());
-
-                // Define expected columns
-                const expectedColumns = {
-                    severity: ['severity', 'vulnerability severity', 'risk', 'risk level'],
-                    vulnId: ['vulnid', 'vuln id', 'cve', 'cveid', 'cve id'],
-                    repositoryName: ['repositoryname', 'repository name', 'repository', 'repo', 'servicename']
-                };
-
-                // Optional columns
-                const optionalColumns = {
-                    packageName: ['packagename', 'package name', 'package'],
-                    category: ['category'],
-                    version: ['version', 'installed version', 'current version'],
-                    fixedVersion: ['fixedversion', 'fixed version', 'patched version'],
-                    vendor: ['vendor'],
-                    fixStatus: ['fixstatus', 'fix status']
-                };
-
-                // Find column indices
-                const findColumnIndex = (possibleNames) => {
-                    const lowerHeaders = headers.map(h => h.toLowerCase());
-                    for (const name of possibleNames) {
-                        const index = lowerHeaders.indexOf(name.toLowerCase());
-                        if (index !== -1) return index;
-                    }
-                    return -1;
-                };
-
-                const indices = {};
-                const foundColumns = [];
-                const missingRequiredColumns = [];
-
-                // Check required columns
-                for (const [key, possibleNames] of Object.entries(expectedColumns)) {
-                    indices[key] = findColumnIndex(possibleNames);
-                    if (indices[key] === -1) {
-                        missingRequiredColumns.push(key);
-                    } else {
-                        foundColumns.push(headers[indices[key]]);
-                    }
-                }
-
-                // Check optional columns
-                for (const [key, possibleNames] of Object.entries(optionalColumns)) {
-                    indices[key] = findColumnIndex(possibleNames);
-                    if (indices[key] !== -1) {
-                        foundColumns.push(headers[indices[key]]);
-                    }
-                }
-
-                // Report found columns
-                let statusMessage = `Found columns: ${foundColumns.join(', ')}`;
-                if (missingRequiredColumns.length > 0) {
-                    throw new Error(`${statusMessage}\nMissing required columns: ${missingRequiredColumns.join(', ')}`);
-                }
-
-                const nonNginxData = [];
-                const nginxData = [];
-                const uniqueCves = new Set();
-                const uniqueServices = new Set();
-                const nginxUniqueCves = new Set();
-                const nginxUniqueServices = new Set();
-
-                for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
-
-                    const values = lines[i].split(delimiter);
-                    const rowData = {
-                        severity: values[indices.severity]?.trim(),
-                        vulnId: values[indices.vulnId]?.trim(),
-                        repositoryName: values[indices.repositoryName]?.trim(),
-                        packageName: values[indices.packageName]?.trim() || 'N/A',
-                        category: values[indices.category]?.trim() || 'N/A',
-                        version: values[indices.version]?.trim() || 'N/A',
-                        fixedVersion: values[indices.fixedVersion]?.trim() || 'N/A',
-                        vendor: values[indices.vendor]?.trim() || 'N/A',
-                        fixStatus: values[indices.fixStatus]?.trim() || 'N/A'
-                    };
-
-                    if (!rowData.severity || !rowData.vulnId || !rowData.repositoryName) continue;
-
-                    // Extract service name
-                    const serviceName = rowData.repositoryName.includes('/')
-                        ? rowData.repositoryName.split('/').pop()
-                        : rowData.repositoryName;
-
-                    const item = {
-                        serviceName,
-                        cveId: rowData.vulnId,
-                        severity: rowData.severity,
-                        packageName: rowData.packageName,
-                        category: rowData.category,
-                        version: rowData.version,
-                        fixedVersion: rowData.fixedVersion,
-                        vendor: rowData.vendor,
-                        fixStatus: rowData.fixStatus,
-                        fullRepositoryName: rowData.repositoryName
-                    };
-
-                    // Separate Nginx and non-Nginx data
-                    if (rowData.repositoryName.toLowerCase().includes('nginx')) {
-                        nginxData.push(item);
-                        nginxUniqueCves.add(rowData.vulnId);
-                        nginxUniqueServices.add(serviceName);
-                    } else {
-                        nonNginxData.push(item);
-                        uniqueCves.add(rowData.vulnId);
-                        uniqueServices.add(serviceName);
-                    }
-                }
-
-                return { nonNginxData, nginxData };
-            }
-
-            // Create service view data
-            function createServiceViewData(data) {
-                const serviceMap = new Map();
-
-                data.forEach(item => {
-                    if (!serviceMap.has(item.serviceName)) {
-                        serviceMap.set(item.serviceName, {
-                            serviceName: item.serviceName,
-                            uniqueCves: new Set(),
-                            cveIds: new Set(),
-                            severityCounts: { Critical: 0, High: 0, Medium: 0, Low: 0 }
-                        });
-                    }
-
-                    const entry = serviceMap.get(item.serviceName);
-                    entry.uniqueCves.add(item.cveId);
-                    entry.cveIds.add(item.cveId);
-                    const severity = getNormalizedSeverity(item.severity);
-                    if (severity && entry.severityCounts[severity] !== undefined) {
-                        entry.severityCounts[severity]++;
-                    }
-                });
-
-                return Array.from(serviceMap.values())
-                    .map(entry => ({
-                        serviceName: entry.serviceName,
-                        uniqueCveCount: entry.uniqueCves.size,
-                        cveIds: Array.from(entry.cveIds).join(', '),
-                        criticalCount: entry.severityCounts.Critical,
-                        highCount: entry.severityCounts.High,
-                        mediumCount: entry.severityCounts.Medium,
-                        lowCount: entry.severityCounts.Low
-                    }))
-                    .sort((a, b) => b.uniqueCveCount - a.uniqueCveCount);
-            }
-
-            // Create CVE view data
-            function createCveViewData(data) {
-                const cveMap = new Map();
-
-                data.forEach(item => {
-                    if (!cveMap.has(item.cveId)) {
-                        cveMap.set(item.cveId, {
-                            cveId: item.cveId,
-                            severity: item.severity,
-                            packageName: item.packageName,
-                            category: item.category,
-                            version: item.version,
-                            fixedVersion: item.fixedVersion,
-                            vendor: item.vendor,
-                            fixStatus: item.fixStatus,
-                            affectedServices: new Set(),
-                            serviceCount: 0,
-                            severityLevel: getSeverityLevel(item.severity)
-                        });
-                    }
-
-                    const entry = cveMap.get(item.cveId);
-                    entry.affectedServices.add(item.serviceName);
-                    entry.serviceCount = entry.affectedServices.size;
-                });
-
-                return Array.from(cveMap.values())
-                    .sort((a, b) => b.severityLevel - a.severityLevel || b.serviceCount - a.serviceCount)
-                    .map(entry => ({
-                        cveId: entry.cveId,
-                        severity: entry.severity,
-                        packageName: entry.packageName,
-                        category: entry.category,
-                        version: entry.version,
-                        fixedVersion: entry.fixedVersion,
-                        vendor: entry.vendor,
-                        fixStatus: entry.fixStatus,
-                        affectedServiceCount: entry.serviceCount,
-                        affectedServices: Array.from(entry.affectedServices).join(', ')
-                    }));
-            }
-
-            // Create summary data
-            function createSummaryData(detailedData, cveData) {
-                const uniqueCves = new Set(detailedData.map(item => item.cveId)).size;
-                const uniqueServices = new Set(detailedData.map(item => item.serviceName)).size;
-                const severityCounts = { Critical: 0, High: 0, Medium: 0, Low: 0 };
-
-                cveData.forEach(item => {
-                    const severity = getNormalizedSeverity(item.severity);
-                    if (severity && severityCounts[severity] !== undefined) {
-                        severityCounts[severity]++;
-                    }
-                });
-
-                return {
-                    stats: [
-                        { metric: 'Total Unique CVEs', value: uniqueCves },
-                        { metric: 'Affected Services', value: uniqueServices },
-                        { metric: 'Critical Vulnerabilities', value: severityCounts.Critical },
-                        { metric: 'High Vulnerabilities', value: severityCounts.High },
-                        { metric: 'Medium Vulnerabilities', value: severityCounts.Medium },
-                        { metric: 'Low Vulnerabilities', value: severityCounts.Low }
-                    ],
-                    severityCounts
-                };
-            }
-
-            // Display summary statistics
-            function displaySummaryStats(data) {
-                elements.mainStats.innerHTML = data.stats.slice(0, 2).map(stat => `
-                    <div class="stat-item">
-                        <h4>${stat.metric}</h4>
-                        <div class="stat-value">${stat.value}</div>
-                    </div>
-                `).join('');
-
-                elements.severityStats.innerHTML = data.stats.slice(2).map(stat => `
-                    <div class="stat-item">
-                        <h4>${stat.metric.split(' ')[0]}</h4>
-                        <div class="stat-value ${stat.metric.split(' ')[0].toLowerCase()}">${stat.value}</div>
-                    </div>
-                `).join('');
-            }
-
-            // Display Nginx summary statistics
-            function displayNginxSummaryStats(data) {
-                elements.nginxMainStats.innerHTML = data.stats.slice(0, 2).map(stat => `
-                    <div class="stat-item">
-                        <h4>${stat.metric}</h4>
-                        <div class="stat-value">${stat.value}</div>
-                    </div>
-                `).join('');
-
-                elements.nginxSeverityStats.innerHTML = data.stats.slice(2).map(stat => `
-                    <div class="stat-item">
-                        <h4>${stat.metric.split(' ')[0]}</h4>
-                        <div class="stat-value ${stat.metric.split(' ')[0].toLowerCase()}">${stat.value}</div>
-                    </div>
-                `).join('');
-            }
-
-            // Display service view
-            function displayServiceView(data) {
-                if (!data.length) {
-                    elements.serviceTableContainer.innerHTML = '<p>No service data to display</p>';
-                    return;
-                }
-
-                const table = document.createElement('table');
-                table.innerHTML = `
-                    <thead>
-                        <tr>
-                            <th>Service Name</th>
-                            <th>Critical</th>
-                            <th>High</th>
-                            <th>Medium</th>
-                            <th>Low</th>
-                            <th>Unique CVEs</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.map(item => `
-                            <tr class="clickable-row">
-                                <td>${item.serviceName}</td>
-                                <td>${item.criticalCount}</td>
-                                <td>${item.highCount}</td>
-                                <td>${item.mediumCount}</td>
-                                <td>${item.lowCount}</td>
-                                <td><span class="clickable">${item.uniqueCveCount}</span></td>
-                            </tr>
-                            <tr class="cve-details-row">
-                                <td colspan="6" class="cve-details-cell">${item.cveIds}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                `;
-
-                table.querySelectorAll('.clickable-row').forEach(row => {
-                    row.addEventListener('click', () => row.classList.toggle('expanded'));
-                });
-
-                table.querySelectorAll('.clickable').forEach(span => {
-                    span.addEventListener('click', e => {
-                        e.stopPropagation();
-                        span.closest('tr').classList.toggle('expanded');
-                    });
-                });
-
-                elements.serviceTableContainer.innerHTML = '';
-                elements.serviceTableContainer.appendChild(table);
-            }
-
-            // Display CVE view
-            function displayCveView(data) {
-                if (!data.length) {
-                    elements.cveTableContainer.innerHTML = '<p>No CVE data to display</p>';
-                    return;
-                }
-
-                const table = document.createElement('table');
-                table.innerHTML = `
-                    <thead>
-                        <tr>
-                            <th>CVE ID</th>
-                            <th>Severity</th>
-                            <th>Package Name</th>
-                            <th>Category</th>
-                            <th>Installed Version</th>
-                            <th>Fixed Version</th>
-                            <th>Affected Services</th>
-                            <th>Count</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.map(item => `
-                            <tr>
-                                <td class="cve-id">${item.cveId}</td>
-                                <td class="${getSeverityClass(item.severity)}">${item.severity}</td>
-                                <td>${item.packageName}</td>
-                                <td>${item.category}</td>
-                                <td>${item.version}</td>
-                                <td>${item.fixedVersion}</td>
-                                <td>${item.affectedServices}</td>
-                                <td>${item.affectedServiceCount}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                `;
-
-                elements.cveTableContainer.innerHTML = '';
-                elements.cveTableContainer.appendChild(table);
-            }
-
-            // Display Nginx CVE view
-            function displayNginxCveView(data) {
-                if (!data.length) {
-                    elements.nginxCveTableContainer.innerHTML = '<p>No Nginx CVE data to display</p>';
-                    return;
-                }
-
-                const table = document.createElement('table');
-                table.innerHTML = `
-                    <thead>
-                        <tr>
-                            <th>CVE ID</th>
-                            <th>Severity</th>
-                            <th>Package Name</th>
-                            <th>Category</th>
-                            <th>Installed Version</th>
-                            <th>Fixed Version</th>
-                            <th>Affected Services</th>
-                            <th>Count</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${data.map(item => `
-                            <tr>
-                                <td class="cve-id">${item.cveId}</td>
-                                <td class="${getSeverityClass(item.severity)}">${item.severity}</td>
-                                <td>${item.packageName}</td>
-                                <td>${item.category}</td>
-                                <td>${item.version}</td>
-                                <td>${item.fixedVersion}</td>
-                                <td>${item.affectedServices}</td>
-                                <td>${item.affectedServiceCount}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                `;
-
-                elements.nginxCveTableContainer.innerHTML = '';
-                elements.nginxCveTableContainer.appendChild(table);
-            }
-
-            // Download CSV
-            function downloadCSV(data, filenamePrefix) {
-                if (!data.length) return;
-
-                const headers = Object.keys(data[0]);
-                const rows = data.map(row => 
-                    headers.map(fieldName => {
-                        let value = row[fieldName];
-                        if (fieldName === 'severity') value = getNormalizedSeverity(value);
-                        return `"${String(value || '').replace(/"/g, '""')}"`;
-                    }).join(',')
-                );
-
-                const csvContent = [headers.join(','), ...rows].join('\n');
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.setAttribute('href', url);
-                link.setAttribute('download', `${filenamePrefix}_${new Date().toISOString().slice(0,10)}.csv`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-
-            // Helper functions
-            function getSeverityClass(severity) {
-                const normalized = getNormalizedSeverity(severity);
-                return normalized ? `severity-${normalized.toLowerCase()}` : '';
-            }
-
-            function getNormalizedSeverity(severity) {
-                if (!severity) return '';
-                const lower = severity.toLowerCase();
-                if (lower.includes('critical')) return 'Critical';
-                if (lower.includes('high')) return 'High';
-                if (lower.includes('medium')) return 'Medium';
-                if (lower.includes('low')) return 'Low';
-                return severity.charAt(0).toUpperCase() + severity.slice(1);
-            }
-
-            function getSeverityLevel(severity) {
-                const normalized = getNormalizedSeverity(severity);
-                return {
-                    'Critical': 4,
-                    'High': 3,
-                    'Medium': 2,
-                    'Low': 1
-                }[normalized] || 0;
-            }
-
-            function showStatus(message, type) {
-                elements.statusDiv.textContent = message;
-                elements.statusDiv.className = `status ${type}`;
-                elements.statusDiv.style.display = 'block';
-            }
-
-            // Initialize
-            initEventListeners();
-        });
-    </script>
-</body>
-</html>
+                    button.addEventListener
