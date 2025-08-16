@@ -822,7 +822,7 @@
                             fixedVersion: item.fixedVersion,
                             vendor: item.vendor,
                             fixStatus: item.fixStatus,
-                            affectedServices: isNginx ? new Set(['Nginx']) : new Set(),
+                            affectedServices: isNginx ? new Set([item.serviceName]) : new Set(),
                             serviceCount: isNginx ? 1 : 0,
                             severityLevel: getSeverityLevel(item.severity)
                         });
@@ -847,7 +847,7 @@
                         vendor: entry.vendor,
                         fixStatus: entry.fixStatus,
                         affectedServiceCount: entry.serviceCount,
-                        affectedServices: isNginx ? ['Nginx'] : Array.from(entry.affectedServices).sort()
+                        affectedServices: isNginx ? [entry.affectedServices.values().next().value] : Array.from(entry.affectedServices).sort()
                     }));
             }
 
@@ -856,6 +856,7 @@
                 const uniqueCves = new Set(detailedData.map(item => item.cveId)).size;
                 const uniqueServices = new Set(detailedData.map(item => item.serviceName)).size;
                 const severityCounts = { Critical: 0, High: 0, Medium: 0, Low: 0 };
+                const serviceNames = [...new Set(detailedData.map(item => item.serviceName))].sort();
 
                 cveData.forEach(item => {
                     const severity = getNormalizedSeverity(item.severity);
@@ -866,6 +867,7 @@
 
                 return {
                     stats: [
+                        { metric: 'Service Name', value: serviceNames.join(', ') },
                         { metric: 'Total Unique CVEs', value: uniqueCves },
                         { metric: 'Affected Services', value: uniqueServices },
                         { metric: 'Critical Vulnerabilities', value: severityCounts.Critical },
@@ -879,14 +881,14 @@
 
             // Display summary statistics
             function displaySummaryStats(data) {
-                elements.mainStats.innerHTML = data.stats.slice(0, 2).map(stat => `
+                elements.mainStats.innerHTML = data.stats.slice(0, 3).map(stat => `
                     <div class="stat-item">
                         <h4>${stat.metric}</h4>
                         <div class="stat-value">${stat.value}</div>
                     </div>
                 `).join('');
 
-                elements.severityStats.innerHTML = data.stats.slice(2).map(stat => `
+                elements.severityStats.innerHTML = data.stats.slice(3).map(stat => `
                     <div class="stat-item">
                         <h4>${stat.metric.split(' ')[0]}</h4>
                         <div class="stat-value ${stat.metric.split(' ')[0].toLowerCase()}">${stat.value}</div>
@@ -896,14 +898,14 @@
 
             // Display Nginx summary statistics
             function displayNginxSummaryStats(data) {
-                elements.nginxMainStats.innerHTML = data.stats.slice(0, 2).map(stat => `
+                elements.nginxMainStats.innerHTML = data.stats.slice(0, 3).map(stat => `
                     <div class="stat-item">
                         <h4>${stat.metric}</h4>
                         <div class="stat-value">${stat.value}</div>
                     </div>
                 `).join('');
 
-                elements.nginxSeverityStats.innerHTML = data.stats.slice(2).map(stat => `
+                elements.nginxSeverityStats.innerHTML = data.stats.slice(3).map(stat => `
                     <div class="stat-item">
                         <h4>${stat.metric.split(' ')[0]}</h4>
                         <div class="stat-value ${stat.metric.split(' ')[0].toLowerCase()}">${stat.value}</div>
@@ -961,10 +963,10 @@
                             return `
                                 <tr class="clickable-row">
                                     <td>${item.serviceName}</td>
-                                    <td>${item.criticalCount}</td>
-                                    <td>${item.highCount}</td>
-                                    <td>${item.mediumCount}</td>
-                                    <td>${item.lowCount}</td>
+                                    <td class="severity-critical">${item.criticalCount}</td>
+                                    <td class="severity-high">${item.highCount}</td>
+                                    <td class="severity-medium">${item.mediumCount}</td>
+                                    <td class="severity-low">${item.lowCount}</td>
                                     <td><span class="clickable">${item.uniqueCveCount}</span></td>
                                 </tr>
                                 <tr class="cve-details-row">
@@ -1010,7 +1012,6 @@
                             <th>Installed Version</th>
                             <th>Fixed Version</th>
                             <th>Affected Services</th>
-                            <th>Count</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1023,10 +1024,9 @@
                                 <td>${item.version}</td>
                                 <td>${item.fixedVersion}</td>
                                 <td><span class="clickable">${item.affectedServiceCount}</span></td>
-                                <td>${item.affectedServiceCount}</td>
                             </tr>
                             <tr class="cve-details-row">
-                                <td colspan="8" class="cve-details-cell">
+                                <td colspan="7" class="cve-details-cell">
                                     <h4>Affected Services</h4>
                                     <ul>
                                         ${item.affectedServices.map(service => `<li>${service}</li>`).join('')}
@@ -1069,7 +1069,7 @@
                             <th>Category</th>
                             <th>Installed Version</th>
                             <th>Fixed Version</th>
-                            <th>Count</th>
+                            <th>Service Name</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1081,7 +1081,7 @@
                                 <td>${item.category}</td>
                                 <td>${item.version}</td>
                                 <td>${item.fixedVersion}</td>
-                                <td>${item.affectedServiceCount}</td>
+                                <td>${item.affectedServices[0]}</td>
                             </tr>
                         `).join('')}
                     </tbody>
