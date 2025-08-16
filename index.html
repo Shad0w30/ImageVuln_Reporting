@@ -573,7 +573,7 @@
                     dataStore.cveViewData = createCveViewData(nonNginxData);
                     dataStore.nginxCveViewData = createCveViewData(nginxData, true);
                     dataStore.summaryData = createSummaryData(nonNginxData, dataStore.cveViewData);
-                    dataStore.nginxSummaryData = createSummaryData(nginxData, dataStore.nginxCveViewData);
+                    dataStore.nginxSummaryData = createNginxSummaryData(nginxData, dataStore.nginxCveViewData);
 
                     // Display all views
                     displaySummaryStats(dataStore.summaryData);
@@ -822,7 +822,7 @@
                             fixedVersion: item.fixedVersion,
                             vendor: item.vendor,
                             fixStatus: item.fixStatus,
-                            affectedServices: isNginx ? new Set([item.serviceName]) : new Set(),
+                            affectedServices: isNginx ? new Set(['Nginx']) : new Set(),
                             serviceCount: isNginx ? 1 : 0,
                             severityLevel: getSeverityLevel(item.severity)
                         });
@@ -847,12 +847,38 @@
                         vendor: entry.vendor,
                         fixStatus: entry.fixStatus,
                         affectedServiceCount: entry.serviceCount,
-                        affectedServices: isNginx ? [entry.affectedServices.values().next().value] : Array.from(entry.affectedServices).sort()
+                        affectedServices: isNginx ? ['Nginx'] : Array.from(entry.affectedServices).sort()
                     }));
             }
 
             // Create summary data
             function createSummaryData(detailedData, cveData) {
+                const uniqueCves = new Set(detailedData.map(item => item.cveId)).size;
+                const uniqueServices = new Set(detailedData.map(item => item.serviceName)).size;
+                const severityCounts = { Critical: 0, High: 0, Medium: 0, Low: 0 };
+
+                cveData.forEach(item => {
+                    const severity = getNormalizedSeverity(item.severity);
+                    if (severity && severityCounts[severity] !== undefined) {
+                        severityCounts[severity]++;
+                    }
+                });
+
+                return {
+                    stats: [
+                        { metric: 'Total Unique CVEs', value: uniqueCves },
+                        { metric: 'Affected Services', value: uniqueServices },
+                        { metric: 'Critical Vulnerabilities', value: severityCounts.Critical },
+                        { metric: 'High Vulnerabilities', value: severityCounts.High },
+                        { metric: 'Medium Vulnerabilities', value: severityCounts.Medium },
+                        { metric: 'Low Vulnerabilities', value: severityCounts.Low }
+                    ],
+                    severityCounts
+                };
+            }
+
+            // Create Nginx summary data
+            function createNginxSummaryData(detailedData, cveData) {
                 const uniqueCves = new Set(detailedData.map(item => item.cveId)).size;
                 const uniqueServices = new Set(detailedData.map(item => item.serviceName)).size;
                 const severityCounts = { Critical: 0, High: 0, Medium: 0, Low: 0 };
@@ -881,14 +907,14 @@
 
             // Display summary statistics
             function displaySummaryStats(data) {
-                elements.mainStats.innerHTML = data.stats.slice(0, 3).map(stat => `
+                elements.mainStats.innerHTML = data.stats.slice(0, 2).map(stat => `
                     <div class="stat-item">
                         <h4>${stat.metric}</h4>
                         <div class="stat-value">${stat.value}</div>
                     </div>
                 `).join('');
 
-                elements.severityStats.innerHTML = data.stats.slice(3).map(stat => `
+                elements.severityStats.innerHTML = data.stats.slice(2).map(stat => `
                     <div class="stat-item">
                         <h4>${stat.metric.split(' ')[0]}</h4>
                         <div class="stat-value ${stat.metric.split(' ')[0].toLowerCase()}">${stat.value}</div>
@@ -1069,7 +1095,6 @@
                             <th>Category</th>
                             <th>Installed Version</th>
                             <th>Fixed Version</th>
-                            <th>Service Name</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1081,7 +1106,6 @@
                                 <td>${item.category}</td>
                                 <td>${item.version}</td>
                                 <td>${item.fixedVersion}</td>
-                                <td>${item.affectedServices[0]}</td>
                             </tr>
                         `).join('')}
                     </tbody>
