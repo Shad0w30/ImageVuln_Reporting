@@ -556,7 +556,7 @@
                     // Prepare data for different views
                     dataStore.serviceViewData = createServiceViewData(nonNginxData);
                     dataStore.cveViewData = createCveViewData(nonNginxData);
-                    dataStore.nginxCveViewData = createCveViewData(nginxData);
+                    dataStore.nginxCveViewData = createCveViewData(nginxData, true);
                     dataStore.summaryData = createSummaryData(nonNginxData, dataStore.cveViewData);
                     dataStore.nginxSummaryData = createSummaryData(nginxData, dataStore.nginxCveViewData);
 
@@ -715,9 +715,12 @@
                             ? serviceIdentifier.split('/').pop()
                             : serviceIdentifier;
                     } else if (mode === 'resource') {
-                        // Parse between 'cibg-' and '-service'
                         const match = serviceIdentifier.match(/cibg-(.*?)-service/i);
-                        serviceName = match && match[1] ? match[1] : serviceIdentifier;
+                        if (match && match[1]) {
+                            serviceName = match[1];
+                        } else {
+                            throw new Error(`Invalid resourceId format in row ${i + 1}: ${serviceIdentifier}. Expected format: cibg-<serviceName>-service`);
+                        }
                     }
 
                     const item = {
@@ -781,7 +784,7 @@
             }
 
             // Create CVE view data
-            function createCveViewData(data) {
+            function createCveViewData(data, isNginx = false) {
                 const cveMap = new Map();
 
                 data.forEach(item => {
@@ -795,15 +798,17 @@
                             fixedVersion: item.fixedVersion,
                             vendor: item.vendor,
                             fixStatus: item.fixStatus,
-                            affectedServices: new Set(),
-                            serviceCount: 0,
+                            affectedServices: isNginx ? new Set(['Nginx']) : new Set(),
+                            serviceCount: isNginx ? 1 : 0,
                             severityLevel: getSeverityLevel(item.severity)
                         });
                     }
 
-                    const entry = cveMap.get(item.cveId);
-                    entry.affectedServices.add(item.serviceName);
-                    entry.serviceCount = entry.affectedServices.size;
+                    if (!isNginx) {
+                        const entry = cveMap.get(item.cveId);
+                        entry.affectedServices.add(item.serviceName);
+                        entry.serviceCount = entry.affectedServices.size;
+                    }
                 });
 
                 return Array.from(cveMap.values())
@@ -818,7 +823,7 @@
                         vendor: entry.vendor,
                         fixStatus: entry.fixStatus,
                         affectedServiceCount: entry.serviceCount,
-                        affectedServices: Array.from(entry.affectedServices).join(', ')
+                        affectedServices: isNginx ? 'Nginx' : Array.from(entry.affectedServices).join(', ')
                     }));
             }
 
@@ -991,7 +996,6 @@
                             <th>Category</th>
                             <th>Installed Version</th>
                             <th>Fixed Version</th>
-                            <th>Affected Services</th>
                             <th>Count</th>
                         </tr>
                     </thead>
@@ -1004,7 +1008,6 @@
                                 <td>${item.category}</td>
                                 <td>${item.version}</td>
                                 <td>${item.fixedVersion}</td>
-                                <td>${item.affectedServices}</td>
                                 <td>${item.affectedServiceCount}</td>
                             </tr>
                         `).join('')}
