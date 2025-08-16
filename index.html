@@ -13,6 +13,7 @@
             --success-color: #22c55e;
             --error-color: #ef4444;
             --warning-color: #f59e0b;
+            --critical-color: #991b1b;
             --text-color: #111827;
             --bg-color: #f1f5f9;
             --card-bg: #ffffff;
@@ -166,6 +167,11 @@
             z-index: 10;
         }
 
+        th.severity-critical { background: var(--critical-color); }
+        th.severity-high { background: var(--error-color); }
+        th.severity-medium { background: var(--warning-color); }
+        th.severity-low { background: var(--success-color); }
+
         tr {
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
@@ -175,7 +181,7 @@
             transform: translateX(4px);
         }
 
-        .severity-critical { color: #991b1b; font-weight: 600; }
+        .severity-critical { color: var(--critical-color); font-weight: 600; }
         .severity-high { color: var(--error-color); font-weight: 600; }
         .severity-medium { color: var(--warning-color); font-weight: 600; }
         .severity-low { color: var(--success-color); font-weight: 600; }
@@ -756,14 +762,14 @@
                         serviceMap.set(item.serviceName, {
                             serviceName: item.serviceName,
                             uniqueCves: new Set(),
-                            cveIds: new Set(),
+                            cveDetails: new Map(),
                             severityCounts: { Critical: 0, High: 0, Medium: 0, Low: 0 }
                         });
                     }
 
                     const entry = serviceMap.get(item.serviceName);
                     entry.uniqueCves.add(item.cveId);
-                    entry.cveIds.add(item.cveId);
+                    entry.cveDetails.set(item.cveId, getNormalizedSeverity(item.severity));
                     const severity = getNormalizedSeverity(item.severity);
                     if (severity && entry.severityCounts[severity] !== undefined) {
                         entry.severityCounts[severity]++;
@@ -774,7 +780,10 @@
                     .map(entry => ({
                         serviceName: entry.serviceName,
                         uniqueCveCount: entry.uniqueCves.size,
-                        cveIds: Array.from(entry.cveIds).join(', '),
+                        cveDetails: Array.from(entry.cveDetails.entries()).map(([cveId, severity]) => ({
+                            cveId,
+                            severity
+                        })),
                         criticalCount: entry.severityCounts.Critical,
                         highCount: entry.severityCounts.High,
                         mediumCount: entry.severityCounts.Medium,
@@ -899,10 +908,10 @@
                     <thead>
                         <tr>
                             <th>Service Name</th>
-                            <th>Critical</th>
-                            <th>High</th>
-                            <th>Medium</th>
-                            <th>Low</th>
+                            <th class="severity-critical">Critical</th>
+                            <th class="severity-high">High</th>
+                            <th class="severity-medium">Medium</th>
+                            <th class="severity-low">Low</th>
                             <th>Unique CVEs</th>
                         </tr>
                     </thead>
@@ -917,7 +926,11 @@
                                 <td><span class="clickable">${item.uniqueCveCount}</span></td>
                             </tr>
                             <tr class="cve-details-row">
-                                <td colspan="6" class="cve-details-cell">${item.cveIds}</td>
+                                <td colspan="6" class="cve-details-cell">
+                                    ${item.cveDetails.map(cve => `
+                                        <span class="severity-${getNormalizedSeverity(cve.severity).toLowerCase()}">${cve.severity}</span>: ${cve.cveId}
+                                    `).join(', ')}
+                                </td>
                             </tr>
                         `).join('')}
                     </tbody>
