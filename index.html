@@ -167,10 +167,10 @@
             z-index: 10;
         }
 
-        th.severity-critical { background: var(--critical-color); }
-        th.severity-high { background: var(--error-color); }
-        th.severity-medium { background: var(--warning-color); }
-        th.severity-low { background: var(--success-color); }
+        th.severity-critical { background: var(--critical-color); color: white; }
+        th.severity-high { background: var(--error-color); color: white; }
+        th.severity-medium { background: var(--warning-color); color: white; }
+        th.severity-low { background: var(--success-color); color: white; }
 
         tr {
             transition: background-color 0.3s ease, transform 0.2s ease;
@@ -333,6 +333,15 @@
 
         .expanded {
             background: #eff6ff;
+        }
+
+        .severity-section {
+            margin-bottom: 0.5rem;
+        }
+
+        .severity-section h4 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
         }
 
         .nginx-container {
@@ -721,14 +730,16 @@
                             ? serviceIdentifier.split('/').pop()
                             : serviceIdentifier;
                     } else if (mode === 'resource') {
-                        // Try to match cibg-<serviceName>-service
-                        const cibgMatch = serviceIdentifier.match(/cibg-(.*?)-service/i);
+                        // Take the part after the last '/'
+                        const lastPart = serviceIdentifier.split('/').pop();
+                        // Try to match cibg-<serviceName>-service in the last part
+                        const cibgMatch = lastPart.match(/cibg-(.*?)-service/i);
                         if (cibgMatch && cibgMatch[1]) {
                             serviceName = cibgMatch[1];
                         } else {
-                            // Fallback to extracting name after last '/' and before '-image'
-                            const imageMatch = serviceIdentifier.match(/([^/]+?)(?:-image|$)/i);
-                            serviceName = imageMatch && imageMatch[1] ? imageMatch[1] : serviceIdentifier;
+                            // Fallback to extracting before '-image' in the last part
+                            const imageMatch = lastPart.match(/(.*?)(?:-image)?$/i);
+                            serviceName = imageMatch && imageMatch[1] ? imageMatch[1] : lastPart;
                         }
                     }
 
@@ -765,14 +776,18 @@
                         serviceMap.set(item.serviceName, {
                             serviceName: item.serviceName,
                             uniqueCves: new Set(),
-                            cveDetails: new Map(),
+                            cveDetails: [],
                             severityCounts: { Critical: 0, High: 0, Medium: 0, Low: 0 }
                         });
                     }
 
                     const entry = serviceMap.get(item.serviceName);
                     entry.uniqueCves.add(item.cveId);
-                    entry.cveDetails.set(item.cveId, getNormalizedSeverity(item.severity));
+                    entry.cveDetails.push({
+                        cveId: item.cveId,
+                        severity: getNormalizedSeverity(item.severity),
+                        severityLevel: getSeverityLevel(item.severity)
+                    });
                     const severity = getNormalizedSeverity(item.severity);
                     if (severity && entry.severityCounts[severity] !== undefined) {
                         entry.severityCounts[severity]++;
@@ -783,10 +798,7 @@
                     .map(entry => ({
                         serviceName: entry.serviceName,
                         uniqueCveCount: entry.uniqueCves.size,
-                        cveDetails: Array.from(entry.cveDetails.entries()).map(([cveId, severity]) => ({
-                            cveId,
-                            severity
-                        })),
+                        cveDetails: entry.cveDetails.sort((a, b) => b.severityLevel - a.severityLevel),
                         criticalCount: entry.severityCounts.Critical,
                         highCount: entry.severityCounts.High,
                         mediumCount: entry.severityCounts.Medium,
@@ -835,7 +847,7 @@
                         vendor: entry.vendor,
                         fixStatus: entry.fixStatus,
                         affectedServiceCount: entry.serviceCount,
-                        affectedServices: isNginx ? 'Nginx' : Array.from(entry.affectedServices).join(', ')
+                        affectedServices: isNginx ? ['Nginx'] : Array.from(entry.affectedServices).sort()
                     }));
             }
 
@@ -919,23 +931,49 @@
                         </tr>
                     </thead>
                     <tbody>
-                        ${data.map(item => `
-                            <tr class="clickable-row">
-                                <td>${item.serviceName}</td>
-                                <td>${item.criticalCount}</td>
-                                <td>${item.highCount}</td>
-                                <td>${item.mediumCount}</td>
-                                <td>${item.lowCount}</td>
-                                <td><span class="clickable">${item.uniqueCveCount}</span></td>
-                            </tr>
-                            <tr class="cve-details-row">
-                                <td colspan="6" class="cve-details-cell">
-                                    ${item.cveDetails.map(cve => `
-                                        <span class="severity-${getNormalizedSeverity(cve.severity).toLowerCase()}">${cve.severity}</span>: ${cve.cveId}
-                                    `).join(', ')}
-                                </td>
-                            </tr>
-                        `).join('')}
+                        ${data.map(item => {
+                            // Group CVEs by severity
+                            const severityGroups = {
+                                Critical: [],
+                                High: [],
+                                Medium: [],
+                                Low: []
+                            };
+                            item.cveDetails.forEach(cve => {
+                                if (severityGroups[cve.severity]) {
+                                    severityGroups[cve.severity].push(cve.cveId);
+                                }
+                            });
+
+                            // Generate HTML for each severity group
+                            const severitySections = ['Critical', 'High', 'Medium', 'Low'].map(severity => {
+                                if (severityGroups[severity].length > 0) {
+                                    return `
+                                        <div class="severity-section">
+                                            <h4 class="severity-${severity.toLowerCase()}">${severity}</h4>
+                                            <span>${severityGroups[severity].join(', ')}</span>
+                                        </div>
+                                    `;
+                                }
+                                return '';
+                            }).filter(section => section).join('');
+
+                            return `
+                                <tr class="clickable-row">
+                                    <td>${item.serviceName}</td>
+                                    <td>${item.criticalCount}</td>
+                                    <td>${item.highCount}</td>
+                                    <td>${item.mediumCount}</td>
+                                    <td>${item.lowCount}</td>
+                                    <td><span class="clickable">${item.uniqueCveCount}</span></td>
+                                </tr>
+                                <tr class="cve-details-row">
+                                    <td colspan="6" class="cve-details-cell">
+                                        ${severitySections || 'No CVEs found'}
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
                     </tbody>
                 `;
 
@@ -977,19 +1015,38 @@
                     </thead>
                     <tbody>
                         ${data.map(item => `
-                            <tr>
+                            <tr class="clickable-row">
                                 <td class="cve-id">${item.cveId}</td>
                                 <td class="${getSeverityClass(item.severity)}">${item.severity}</td>
                                 <td>${item.packageName}</td>
                                 <td>${item.category}</td>
                                 <td>${item.version}</td>
                                 <td>${item.fixedVersion}</td>
-                                <td>${item.affectedServices}</td>
+                                <td><span class="clickable">${item.affectedServiceCount}</span></td>
                                 <td>${item.affectedServiceCount}</td>
+                            </tr>
+                            <tr class="cve-details-row">
+                                <td colspan="8" class="cve-details-cell">
+                                    <h4>Affected Services</h4>
+                                    <ul>
+                                        ${item.affectedServices.map(service => `<li>${service}</li>`).join('')}
+                                    </ul>
+                                </td>
                             </tr>
                         `).join('')}
                     </tbody>
                 `;
+
+                table.querySelectorAll('.clickable-row').forEach(row => {
+                    row.addEventListener('click', () => row.classList.toggle('expanded'));
+                });
+
+                table.querySelectorAll('.clickable').forEach(span => {
+                    span.addEventListener('click', e => {
+                        e.stopPropagation();
+                        span.closest('tr').classList.toggle('expanded');
+                    });
+                });
 
                 elements.cveTableContainer.innerHTML = '';
                 elements.cveTableContainer.appendChild(table);
@@ -1043,6 +1100,9 @@
                     headers.map(fieldName => {
                         let value = row[fieldName];
                         if (fieldName === 'severity') value = getNormalizedSeverity(value);
+                        if (fieldName === 'affectedServices' && Array.isArray(row[fieldName])) {
+                            value = row[fieldName].join(', ');
+                        }
                         return `"${String(value || '').replace(/"/g, '""')}"`;
                     }).join(',')
                 );
